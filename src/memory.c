@@ -1,5 +1,4 @@
 #include "../include/memory.h"
-#include "../include/discky.h"
 
 inline int growCapacity(int oldCap){
     if(oldCap==0)return 8;
@@ -22,10 +21,10 @@ void iniVec(Vec *vector , size_t elementSize){
     vector->size = elementSize;
 }
 
-void* pushVec(Vec *vector){
+void* pushVec(Discky* discky ,Vec *vector){
     if(vector->count == vector->capacity){
         vector->capacity = growCapacity(vector->capacity);
-        vector->vector = reallocate(vector->vector ,  vector->capacity * vector->size);
+        vector->vector = reallocate(discky ,vector->vector ,  vector->capacity * vector->size);
     }
     vector->count++;
     return ((char*)vector->vector)+ ((vector->count -1)*vector->size);
@@ -34,4 +33,21 @@ void* pushVec(Vec *vector){
 void popVec(Vec *vector){
     if(!vector->count)return;
     vector->count--;
+}
+
+inline void freeVec(Vec* vector){
+    free(vector->vector);
+}
+
+void* getVecElement(Discky* discky ,const Vec* vector ,const int x){
+    #ifdef DEBUG
+    if((vector->count<=x)||(x<0))callErrorHandle(discky , ERROR_INTERNAL , "internal error : invalid vector index");
+    #endif
+    return ((char*)vector->vector)+ (x*vector->size);
+}
+
+void resizeVec(Discky* discky , Vec* vector ,const int x){
+    reallocate(discky , vector , x*vector->size);
+    vector->capacity = x;
+    if(vector->count>x)vector->count = x;
 }

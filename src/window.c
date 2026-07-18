@@ -18,6 +18,6 @@ terminalInfo getTerminalInfo(){
     #else
     struct winsize ws;
     if(ioctl(STDOUT_FILENO , TIOCGWINSZ , &ws)==-1)return (terminalInfo){-1 , -1 , LINUX};
-    return (terminalInfo){ws.ws_col , ws.ws_wor , LINUX};
+    return (terminalInfo){ws.ws_col , ws.ws_row , LINUX};
     #endif
 }

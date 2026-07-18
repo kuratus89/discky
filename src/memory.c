@@ -1,18 +1,18 @@
 #include "../include/memory.h"
-#include "stddef.h"
+#include "../include/discky.h"
 
 inline int growCapacity(int oldCap){
     if(oldCap==0)return 8;
     return oldCap*2;
 }
 
-void* reallocate(void* pointer , size_t newSize){
+void* reallocate( Discky* discky, void* pointer , size_t newSize){
     if(newSize == 0){
         free(pointer);
         return NULL;
     }
     void* result = realloc(pointer , newSize);
-    if(result==NULL)exit(1);
+    if(result==NULL)callErrorHandle(discky , ERROR_OUT_OF_MEM ,"cannot allocate memory");
     return result;
 }
 void iniVec(Vec *vector , size_t elementSize){

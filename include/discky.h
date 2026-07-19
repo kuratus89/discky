@@ -2,17 +2,20 @@
 #include "window.h"
 #include "memory.h"
 #include "colors.h"
+#include "render.h"
 
 typedef enum{
     OBJ_TRIANGLE,
     OBJ_RECTANGLE,
     OBJ_CIRCLE,
+    OBJ_LINE,
     OBJ_IMAGE,
     OBJ_RAW_TEXT,
 }objType;
 
 typedef enum{
     ERROR_OUT_OF_MEM,
+    ERROR_TERMINAL_INFO,
 
     ERROR_INTERNAL,
 }ERRORS;
@@ -49,9 +52,11 @@ typedef struct{
 
 
 typedef struct{
-    terminalInfo oldTerminalInfo;
+    TerminalInfo terminalInfo;
     Vec objs; // vector of objects
-    Screen screen;
+    Screen* backBuffer;
+    Screen* frontBuffer;
+    Screen bgBuffer;
     objColor bgColor;
     void (*handleErrors)(ERRORS error , char* msg);
     

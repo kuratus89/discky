@@ -1,5 +1,4 @@
 #include  "../include/discky.h"
-#include "../include/window.h"
 
 
 
@@ -53,19 +52,7 @@ void endDiscky(Discky* discky){
     resizeVec(discky , &discky->objs , 0);
 }
 
-void renderNewBg(Discky* discky , int x , int y){
-    // free(screen->pixels.vector);
-    // resizeVec(discky , &screen->pixels , 0);
-    discky->screen.x = x;
-    discky->screen.y = y;
-    int size = x*y;
-    resizeVec(discky , &discky->screen.pixels , size);
-    for(int i=0 ; i!=size ; i++) *(objColor*)getVecElement(discky , &discky->screen.pixels , i) = discky->bgColor;
-}
 
-void renderDiscky(Discky* discky){
-    
-}
 
 void iniScreen(Screen* screen){
     screen->x =0;
@@ -73,10 +60,23 @@ void iniScreen(Screen* screen){
     iniVec(&screen->pixels , sizeof(objColor));
 }
 
+
+
 void iniDiscky(Discky *discky ){
-    discky->oldTerminalInfo = getTerminalInfo();
+    // discky->oldTerminalInfo.sysName = NULL;
+    // discky->oldTerminalInfo.x=-1;
+    // discky->oldTerminalInfo.y =-1;
+    discky->terminalInfo.sysName=OS_INVALID;
+    discky->terminalInfo.x=-1;
+    discky->terminalInfo.y=-1;
     discky->handleErrors = NULL;
     iniVec(&discky->objs , sizeof(objects));
-    iniScreen(&discky->screen);    
-    renderNewBg(discky , discky->oldTerminalInfo.x , discky->oldTerminalInfo.y);
+    allocBuffer(&discky->frontBuffer);
+    allocBuffer(&discky->backBuffer);
+    iniScreen(discky->frontBuffer);
+    iniScreen(discky->backBuffer);
+    iniScreen(&discky->bgBuffer);
+    // discky->bgColor = 
+
 }
+

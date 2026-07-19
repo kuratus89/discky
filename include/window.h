@@ -1,14 +1,16 @@
 #pragma once
 
 typedef enum{
-    WINDOWS,
-    LINUX
+    OS_WINDOWS,
+    OS_LINUX,
+    OS_INVALID,
+    
 }operatingSystem;
 
 typedef struct{
     int x;
     int y;
     operatingSystem sysName;
-}terminalInfo;
+}TerminalInfo;
 
-terminalInfo getTerminalInfo();
+TerminalInfo getTerminalInfo();

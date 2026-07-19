@@ -1,3 +1,4 @@
+#include "../include/colors.h"
 #include  "../include/discky.h"
 
 
@@ -77,7 +78,7 @@ void iniDiscky(Discky *discky ){
     allocBuffer(&discky->backBuffer);
     iniScreen(discky->frontBuffer);
     iniScreen(discky->backBuffer);
-    // discky->bgColor = 
+    discky->bgColor = DISCKY_COLOR_BLACK;
 
     setlocale(LC_ALL , "");
 }

@@ -93,7 +93,7 @@ void renderNewBg(Discky* discky , int x , int y , Screen* screen){
     for(int i=0 ; i!=size ; i++)*(objColor*)getVecElement(discky , &screen->pixels , i) = discky->bgColor;
 }
 
-void DisplayDiscky(Discky* discky){
+void displayDiscky(Discky* discky){
     // will add optimized printer later
 
     renderNewBg(discky , discky->terminalInfo.x , discky->terminalInfo.y , discky->frontBuffer);

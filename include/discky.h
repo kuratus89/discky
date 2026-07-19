@@ -1,4 +1,5 @@
 #pragma once
+
 #include "window.h"
 #include "memory.h"
 #include "colors.h"
@@ -67,3 +68,5 @@ typedef struct{
 
 void callErrorHandle(const Discky* discky , const ERRORS error , const char* msg);
 void renderDiscky(Discky* discky);
+void clearGarbge(Discky* discky);
+void displayDiscky(Discky* discky);

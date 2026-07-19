@@ -45,6 +45,7 @@ void renderNewBg(Discky* discky , int x , int y , Screen* screen){
 }
 
 void renderDiscky(Discky* discky){
+    clearGarbge(discky);
     TerminalInfo terminalInfo = getTerminalInfo();
     
     if(terminalInfo.sysName==OS_INVALID)callErrorHandle(discky , ERROR_TERMINAL_INFO , "failed to get terminal info");
@@ -56,7 +57,4 @@ void renderDiscky(Discky* discky){
     }
 
     for(int i=0 ; i<discky->objs.count ; i++)renderObj(discky , (objects*)getVecElement(discky , &discky->objs , i));
-    
-
-
 }

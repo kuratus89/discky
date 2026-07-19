@@ -53,3 +53,4 @@ void resizeVec(Discky* discky , Vec* vector ,const int x){
 void allocBuffer(Screen** screen){
     *screen = malloc(sizeof(Screen));
 }
+

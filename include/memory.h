@@ -1,11 +1,12 @@
 #pragma once
+#include "discky.h"
 #include <stddef.h>
 #include "stdlib.h"
-#include "discky.h"
 
 # define pushVector(vec , data) \ (*(typeof(data)*)pushVec(vec) = data) 
 #define MAX(a,b)({typeof(a) tempa =(a); typeof(b) tempb = (b) ; tempa>tempb ? tempa : tempb;})
 #define MIN(a,b)({typeof(a) tempa = (a) ; typeof(b) tempb =(b) ; tempa<tempb ? tempa :tempb;})
+#define SWAP(a,b)({typeof(a) temp = (a) ; a = b ; b = temp;})
 
 typedef struct{
     void* vector;

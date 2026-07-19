@@ -51,10 +51,12 @@ void renderDiscky(Discky* discky){
 
     if((discky->terminalInfo.sysName = OS_INVALID)||(discky->terminalInfo.x != terminalInfo.x)||(discky->terminalInfo.y!=terminalInfo.y)){
         discky->terminalInfo = terminalInfo;
-        renderNewBg(discky , terminalInfo.x , terminalInfo.y , &discky->bgBuffer);
-        *discky->backBuffer = discky->bgBuffer;
-        *discky->frontBuffer = discky->bgBuffer;
+        renderNewBg(discky , terminalInfo.x , terminalInfo.y , discky->frontBuffer);
+        renderNewBg(discky , terminalInfo.x , terminalInfo.y , discky->backBuffer);
     }
+
+    for(int i=0 ; i<discky->objs.count ; i++)renderObj(discky , (objects*)getVecElement(discky , &discky->objs , i));
+    
 
 
 }

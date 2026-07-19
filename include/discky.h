@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "colors.h"
 #include "render.h"
+#include <locale.h>
 
 typedef enum{
     OBJ_TRIANGLE,
@@ -58,10 +59,11 @@ typedef struct{
     Vec objs; // vector of objects
     Screen* backBuffer;
     Screen* frontBuffer;
-    Screen bgBuffer;
     objColor bgColor;
+    Vec garbge;
     void (*handleErrors)(ERRORS error , char* msg);
     
 }Discky;
 
 void callErrorHandle(const Discky* discky , const ERRORS error , const char* msg);
+void renderDiscky(Discky* discky);

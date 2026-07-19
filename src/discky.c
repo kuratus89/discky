@@ -72,12 +72,20 @@ void iniDiscky(Discky *discky ){
     discky->terminalInfo.y=-1;
     discky->handleErrors = NULL;
     iniVec(&discky->objs , sizeof(objects));
+    iniVec(&discky->garbge , sizeof(void*));
     allocBuffer(&discky->frontBuffer);
     allocBuffer(&discky->backBuffer);
     iniScreen(discky->frontBuffer);
     iniScreen(discky->backBuffer);
-    iniScreen(&discky->bgBuffer);
     // discky->bgColor = 
 
+    setlocale(LC_ALL , "");
+}
+
+void clearGarbge(Discky* discky){
+    for(int i=0 ; i!=discky->garbge.count ; i++){
+        free(*(void**)getVecElement(discky , &discky->garbge , i));
+    }
+    discky->garbge.count=0;
 }
 

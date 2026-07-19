@@ -27,8 +27,10 @@ typedef enum{
 
 typedef struct {
     coordinateType type;
-    double x;
-    double y;
+    int x;
+    int y;
+    double norX;
+    double norY;
 }coordinate;
 
 typedef struct{

@@ -5,7 +5,7 @@
 
 
 static inline void callErrorHandle(const Discky *discky ,const ERRORS error , const char* msg){
-    #ifdef DEBUG
+    #ifndef NO_DEBUG
     if(discky->handleErrors!=NULL)discky->handleErrors(error , msg);
     #endif
     exit(0);
@@ -25,13 +25,14 @@ void setDisckyBackground(Discky* discky ,const objColor  color){
 
 
 
-void DisckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,const objColor color){
+objects* DisckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,const objColor color){
     objects* obj = pushVec(discky , &discky->objs);
     iniVec(&obj->vertex , sizeof(coordinate));
     obj->color = color;
     obj->type = OBJ_RECTANGLE;
     *(coordinate*)pushVec(discky , &obj->vertex) = x;
     *(coordinate*)pushVec(discky , &obj->vertex) = y;
+    return obj;
 }
 
 

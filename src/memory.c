@@ -40,9 +40,7 @@ inline void freeVec(Vec* vector){
 }
 
 void* getVecElement(Discky* discky ,const Vec* vector ,const int x){
-    #ifdef DEBUG
     if((vector->count<=x)||(x<0))callErrorHandle(discky , ERROR_INTERNAL , "internal error : invalid vector index");
-    #endif
     return ((char*)vector->vector)+ (x*vector->size);
 }
 

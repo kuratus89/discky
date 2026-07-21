@@ -1,6 +1,7 @@
 #include "../include/memory.h"
+#include "../include/discky.h"
 
-inline int growCapacity(int oldCap){
+static inline int growCapacity(int oldCap){
     if(oldCap==0)return 8;
     return oldCap*2;
 }
@@ -45,7 +46,7 @@ void* getVecElement(Discky* discky ,const Vec* vector ,const int x){
 }
 
 void resizeVec(Discky* discky , Vec* vector ,const int x){
-    reallocate(discky , vector , x*vector->size);
+    vector->vector = reallocate(discky , vector->vector , x*vector->size);
     vector->capacity = x;
     if(vector->count>x)vector->count = x;
 }

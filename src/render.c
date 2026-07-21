@@ -1,4 +1,5 @@
 #include "../include/render.h"
+#include "../include/discky.h"
 
 void normalizedToScreen(Discky* discky ,coordinate* coor){
     if(coor->type == COORD_TERMINAL_SCREEN)return;
@@ -50,7 +51,7 @@ void renderDiscky(Discky* discky){
     
     if(terminalInfo.sysName==OS_INVALID)callErrorHandle(discky , ERROR_TERMINAL_INFO , "failed to get terminal info");
 
-    if((discky->terminalInfo.sysName = OS_INVALID)||(discky->terminalInfo.x != terminalInfo.x)||(discky->terminalInfo.y!=terminalInfo.y)){
+    if((discky->terminalInfo.sysName == OS_INVALID)||(discky->terminalInfo.x != terminalInfo.x)||(discky->terminalInfo.y!=terminalInfo.y)){
         discky->terminalInfo = terminalInfo;
         renderNewBg(discky , terminalInfo.x , terminalInfo.y , discky->frontBuffer);
         renderNewBg(discky , terminalInfo.x , terminalInfo.y , discky->backBuffer);

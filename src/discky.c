@@ -5,7 +5,7 @@
 
 
 
-static inline void callErrorHandle(const Discky *discky ,const ERRORS error , const char* msg){
+void callErrorHandle(const Discky *discky ,const ERRORS error ,  char* msg){
     #ifndef NO_DEBUG
     if(discky->handleErrors!=NULL)discky->handleErrors(error , msg);
     #endif
@@ -26,7 +26,7 @@ void setDisckyBackground(Discky* discky ,const objColor  color){
 
 
 
-objects* DisckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,const objColor color){
+objects* disckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,const objColor color){
     objects* obj = pushVec(discky , &discky->objs);
     iniVec(&obj->vertex , sizeof(coordinate));
     obj->color = color;
@@ -39,15 +39,12 @@ objects* DisckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,
 
 
 
-inline void freeObj(objects* obj){
+static inline void freeObj(objects* obj){
     free(obj->vertex.vector);
     obj->vertex.count=0;
 }
 
-inline void refreshDiscky(Discky* discky){
-    for(int i=0 ; discky->objs.count !=i ; i++)freeObj((objects*)getVecElement(discky , &discky->objs , i));
-    discky->objs.count=0;
-}
+
 
 void endDiscky(Discky* discky){
     refreshDiscky(discky);
@@ -90,3 +87,8 @@ void clearGarbge(Discky* discky){
     discky->garbge.count=0;
 }
 
+void refreshDiscky(Discky* discky){
+    for(int i=0 ; discky->objs.count !=i ; i++)freeObj((objects*)getVecElement(discky , &discky->objs , i));
+    discky->objs.count=0;
+    clearGarbge(discky);
+}

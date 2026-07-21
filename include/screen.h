@@ -4,3 +4,5 @@
 
 #include <wchar.h>
 #include <stdbool.h>
+
+void displayDiscky(Discky* discky);

@@ -1,10 +1,13 @@
 #pragma once
 
+#include "types.h"
 #include "window.h"
 #include "memory.h"
-#include "colors.h"
-#include "render.h"
+#include "screen.h"
 #include <locale.h>
+
+#define NOR_COORD(A,B) (coordinate){COORD_NORMALIZED , -1 , -1 , A , B}
+#define SCR_COORD(A,B) (coordinate){COORD_TERMINAL_SCREEN , A, B , -1 , -1}
 
 typedef enum{
     OBJ_TRIANGLE,
@@ -47,15 +50,15 @@ typedef struct{
     objColor color;
 }objects;
 
-typedef struct{
+struct Screen{
     int x;
     int y;
     Vec pixels; // vector of objColors
-}Screen;
+};
 
 
 
-typedef struct{
+struct Discky{
     TerminalInfo terminalInfo;
     Vec objs; // vector of objects
     Screen* backBuffer;
@@ -64,9 +67,20 @@ typedef struct{
     Vec garbge;
     void (*handleErrors)(ERRORS error , char* msg);
     
-}Discky;
+};
 
-void callErrorHandle(const Discky* discky , const ERRORS error , const char* msg);
+void callErrorHandle(const Discky* discky , const ERRORS error , char* msg);
 void renderDiscky(Discky* discky);
 void clearGarbge(Discky* discky);
 void displayDiscky(Discky* discky);
+void iniDiscky(Discky* discky);
+void refreshDiscky(Discky* discky);
+void endDiscky(Discky* discky);
+objects* disckyDrawRec(Discky* discky , const coordinate x , const coordinate y , const objColor color);
+void displayDiscky(Discky* discky);
+void setErrorHandleFunc(Discky* discky , void (*handleError)(ERRORS error , char* msg));
+void setDisckyBackground(Discky* discky , const objColor color);
+
+
+#include "colors.h"
+#include "render.h"

@@ -49,6 +49,7 @@ void Discky::render(){
         terminalInfo = Info;
         renderNewBg(*this ,  Info.x ,Info.y , frontBuffer);
         renderNewBg(*this , Info.x , Info.y , backBuffer);
+        forceRedraw=1;
     }
 
     for(auto& obj:objs)renderObj(*this , obj);

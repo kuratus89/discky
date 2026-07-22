@@ -39,26 +39,71 @@ void Discky::display(){
     std::string out;
     out.reserve(static_cast<size_t> (terminalInfo.x)* terminalInfo.y * 20);
     moveCursor(out , 0 ,0);
-    for(int i=0 ; i<terminalInfo.y ; i+=2 , sy++){
-        for(int j=0 ; j<terminalInfo.x ; j++){
 
-            if((x!=j)||(y!=i)){
-                moveCursor(out , j ,sy);
-                x=j;
-                y=sy;
+    if((backBuffer.x==frontBuffer.x)&&(backBuffer.y==frontBuffer.y)&&(!forceRedraw)){
+        for(int i=0; i<terminalInfo.y ; i+=2 , sy++){
+            for(int j=0 ; j<terminalInfo.x ; j++){
+                objColor& tf = frontBuffer.pixels[frontBuffer.x*i +j];
+                objColor& tb = backBuffer.pixels[backBuffer.x*i +j];
+                objColor& bf = frontBuffer.pixels[frontBuffer.x*(i+1)+ j];
+                objColor& bb = backBuffer.pixels[backBuffer.x*(i+1) + j];
+
+                if(compareObjColor(tf , tb)&&compareObjColor(bf , bb))continue;
+
+                if((x!=j)||(y!=i)){
+                    moveCursor(out , j , sy);
+                    x=j;
+                    y=sy;
+                }
+                if(!compareObjColor(bf , bgColor)){
+                    colorBg(out , bf);
+                    bgColor = bf;
+                }
+                if(compareObjColor(tf , bf)){
+                    out+= " ";
+                }
+                else {
+                    if(!compareObjColor(tf , txtColor)){
+                        colorText(out , tf);
+                        txtColor = tf;
+                    }
+                    out +="\u2580";
+                }
+                x++;
             }
-            objColor& upPixel = frontBuffer.pixels[frontBuffer.x * i + j];
-            objColor& downPixel = frontBuffer.pixels[frontBuffer.x*(i+1)+j];
-            if(!compareObjColor(upPixel , txtColor)){
-                colorText(out , upPixel);
-                txtColor = upPixel;
+        }
+    }
+    else{
+        
+        for(int i=0 ; i<terminalInfo.y ; i+=2 , sy++){
+            for(int j=0 ; j<terminalInfo.x ; j++){
+
+                if((x!=j)||(y!=i)){
+                    moveCursor(out , j ,sy);
+                    x=j;
+                    y=sy;
+                }
+                objColor& upPixel = frontBuffer.pixels[frontBuffer.x * i + j];
+                objColor& downPixel = frontBuffer.pixels[frontBuffer.x*(i+1)+j];
+                
+                if(!compareObjColor(downPixel , bgColor)){
+                    colorBg(out , downPixel);
+                    bgColor = downPixel;
+                }
+                
+                if(compareObjColor(upPixel , downPixel)){
+                    out+=" ";
+                }
+                else {
+                    if(!compareObjColor(upPixel , txtColor)){
+                        colorText(out , upPixel);
+                        txtColor = upPixel;
+                    }
+                    out+="\u2580";
+                }
+                x++;
+
             }
-            if(!compareObjColor(downPixel , bgColor)){
-                colorBg(out , downPixel);
-                bgColor = downPixel;
-            }
-            out+="\u2580";
-            x++;
         }
     }
 

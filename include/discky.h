@@ -82,7 +82,7 @@ class Discky{
         Screen frontBuffer;
         objColor bgColor;
         std::function<void(ERRORS , const std::string&)> handleErrors;
-
+        bool forceRedraw=1;
         Discky();
         void callErrorHandle(ERRORS error , const std::string& msg) const;
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);

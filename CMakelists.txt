@@ -2,20 +2,22 @@ cmake_minimum_required(VERSION 3.16)
 
 project(discky
     VERSION 1.0.0
-    LANGUAGES C
+    LANGUAGES CXX
 )
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_library(discky STATIC
-    src/discky.c
-    src/window.c
-    src/memory.c
-    src/render.c
-    src/screen.c
+    src/discky.cpp
+    src/window.cpp
+    # src/memory.cpp
+    src/render.cpp
+    src/screen.cpp
 )
 
 set_target_properties(discky PROPERTIES
@@ -27,5 +29,5 @@ target_include_directories(discky
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_executable(hello example/first.c)
-target_link_libraries(hello PRIVATE discky)
+add_executable(first example/first.cpp)
+target_link_libraries(first PRIVATE discky)

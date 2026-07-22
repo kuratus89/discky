@@ -1,16 +1,15 @@
 #pragma once
 
-typedef enum{
-    OS_WINDOWS,
-    OS_LINUX,
-    OS_INVALID,
-    
-}operatingSystem;
+enum class OperatingSystem {
+    WINDOWS,
+    LINUX,
+    INVALID,
+};
 
-typedef struct{
+struct TerminalInfo{
     int x;
     int y;
-    operatingSystem sysName;
-}TerminalInfo;
+    OperatingSystem sysName;
+};
 
 TerminalInfo getTerminalInfo();

@@ -2,4 +2,4 @@
 
 #include "types.h"
 
-void renderNewBg(Discky* discky, int x , int y, Screen* screen);
+void renderNewBg(Discky& discky, int x , int y, Screen& screen);

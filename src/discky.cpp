@@ -1,94 +1,63 @@
 #include "../include/colors.h"
 #include  "../include/discky.h"
 #include <iostream>
+#include <cstdlib>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
-
-
-void callErrorHandle(const Discky *discky ,const ERRORS error ,  char* msg){
-    #ifndef NO_DEBUG
-    if(discky->handleErrors!=NULL)discky->handleErrors(error , msg);
-    #endif
-    exit(0);
-}
-
-void setErrorHandleFunc(Discky *discky , void(*handleError)(ERRORS error , char* msg)){
-    discky->handleErrors = handleError;
-}
-
-void setDisckyBackground(Discky* discky ,const objColor  color){
-    discky->bgColor = color;
-}
-
-
-
-
-
-
-
-objects* disckyDrawRec(Discky *discky ,const coordinate x , const coordinate y ,const objColor color){
-    objects* obj = (objects*)pushVec(discky , &discky->objs);
-    iniVec(&obj->vertex , sizeof(coordinate));
-    obj->color = color;
-    obj->type = OBJ_RECTANGLE;
-    *(coordinate*)pushVec(discky , &obj->vertex) = x;
-    *(coordinate*)pushVec(discky , &obj->vertex) = y;
-    return obj;
-}
-
-
-
-
-static inline void freeObj(objects* obj){
-    free(obj->vertex.vector);
-    obj->vertex.count=0;
-}
-
-
-
-void endDiscky(Discky* discky){
-    refreshDiscky(discky);
-    resizeVecCapacity(discky , &discky->objs , 0);
-}
-
-
-
-void iniScreen(Screen* screen){
-    screen->x =0;
-    screen->y=0;
-    iniVec(&screen->pixels , sizeof(objColor));
-}
-
-
-
-void iniDiscky(Discky *discky ){
-
-
-    discky->terminalInfo.sysName=OS_INVALID;
-    discky->terminalInfo.x=-1;
-    discky->terminalInfo.y=-1;
-    discky->handleErrors = NULL;
-    iniVec(&discky->objs , sizeof(objects));
-    iniVec(&discky->garbge , sizeof(void*));
-    allocBuffer(&discky->frontBuffer);
-    allocBuffer(&discky->backBuffer);
-    iniScreen(discky->frontBuffer);
-    iniScreen(discky->backBuffer);
-    discky->bgColor = DISCKY_COLOR_BLACK;
-
+void iniTerminal(){
+    #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
-    std::cout<<(L"\033[?25l");
+    #endif
+    std::ios::sync_with_stdio(false);
+    std::cout<<"\033[?25l";
+    std::cout.flush();
 }
 
-void clearGarbge(Discky* discky){
-    for(int i=0 ; i!=discky->garbge.count ; i++){
-        free(*(void**)getVecElement(discky , &discky->garbge , i));
-    }
-    discky->garbge.count=0;
+Discky::Discky(){
+    terminalInfo.sysName = OperatingSystem::INVALID;
+    terminalInfo.x = -1;
+    terminalInfo.y = -1;
+    handleErrors = nullptr;
+    bgColor = DISCKY_COLOR_BLACK;
 }
 
-void refreshDiscky(Discky* discky){
-    for(int i=0 ; discky->objs.count !=i ; i++)freeObj((objects*)getVecElement(discky , &discky->objs , i));
-    discky->objs.count=0;
-    clearGarbge(discky);
+
+
+
+void Discky::callErrorHandle(const ERRORS error ,  const std::string& msg)const{
+    if(handleErrors)handleErrors(error , msg);
+    std::exit(0);
+}
+
+void Discky::setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler){
+    handleErrors = handler;
+}
+
+void Discky::setBackground(const objColor&  color){
+    bgColor = color;
+}
+
+
+
+
+
+
+
+objects& Discky::drawRec(const Coordinate& a , const Coordinate& b ,const objColor& color){
+    objects obj;
+    obj.color = color;
+    obj.type = objType::RECTANGLE;
+    obj.vertex.push_back(a);
+    obj.vertex.push_back(b);
+    objs.push_back(obj);
+    return objs.back();
+}
+
+
+
+void Discky::refresh(){
+    objs.clear();
 }

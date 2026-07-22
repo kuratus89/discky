@@ -2,84 +2,111 @@
 
 #include "types.h"
 #include "window.h"
-#include "memory.h"
-#include "screen.h"
-#include <locale.h>
+// #include "memory.h"
+#include <vector>
+#include <string>
+#include <functional>
+// #include "screen.h"
+// #include <locale.h>
 
-#define NOR_COORD(A,B) (coordinate){COORD_NORMALIZED , -1 , -1 , A , B}
-#define SCR_COORD(A,B) (coordinate){COORD_TERMINAL_SCREEN , A, B , -1 , -1}
+// #define NOR_COORD(A,B) (coordinate){COORD_NORMALIZED , -1 , -1 , A , B}
+// #define SCR_COORD(A,B) (coordinate){COORD_TERMINAL_SCREEN , A, B , -1 , -1}
 
-typedef enum{
-    OBJ_TRIANGLE,
-    OBJ_RECTANGLE,
-    OBJ_CIRCLE,
-    OBJ_LINE,
-    OBJ_IMAGE,
-    OBJ_RAW_TEXT,
-}objType;
+enum class objType{
+    TRIANGLE,
+    RECTANGLE,
+    CIRCLE,
+    LINE,
+    IMAGE,
+    RAW_TEXT,
+};
 
-typedef enum{
-    ERROR_OUT_OF_MEM,
-    ERROR_TERMINAL_INFO,
+enum ERRORS{
+    OUT_OF_MEM,
+    TERMINAL_INFO,
 
-    ERROR_INTERNAL,
-}ERRORS;
+    INTERNAL,
+};
 
-typedef enum{
-    COORD_TERMINAL_SCREEN,
-    COORD_NORMALIZED
-}coordinateType;
+enum CoordinateType{
+    TERMINAL_SCREEN,
+    NORMALIZED
+};
 
-typedef struct {
-    coordinateType type;
+struct Coordinate{
+    CoordinateType type;
     int x;
     int y;
     double norX;
     double norY;
-}coordinate;
+};
 
-typedef struct{
+inline Coordinate NOR_COORD(double a, double b){return Coordinate{CoordinateType::NORMALIZED , -1 , -1 , a , b};}
+inline Coordinate SCR_COORD(int a , int b){return Coordinate{CoordinateType::TERMINAL_SCREEN ,a , b , -1 , -1};}
+struct objColor{
     int r;
     int g;
     int b;
-}objColor;
+};
 
-typedef struct{
-    Vec vertex;// vector of coordinate
+struct objects{
+    std::vector<Coordinate> vertex;
     objType type;
     objColor color;
-}objects;
+};
 
 struct Screen{
-    int x;
-    int y;
-    Vec pixels; // vector of objColors
+    int x=0;
+    int y=0;
+    std::vector<objColor> pixels;
 };
 
 
 
-struct Discky{
-    TerminalInfo terminalInfo;
-    Vec objs; // vector of objects
-    Screen* backBuffer;
-    Screen* frontBuffer;
-    objColor bgColor;
-    Vec garbge;
-    void (*handleErrors)(ERRORS error , char* msg);
+// struct Discky{
+//     TerminalInfo terminalInfo;
+//     Vec objs; // vector of objects
+//     Screen* backBuffer;
+//     Screen* frontBuffer;
+//     objColor bgColor;
+//     Vec garbge;
+//     void (*handleErrors)(ERRORS error , char* msg);
     
+// };
+
+class Discky{
+    public:
+        TerminalInfo terminalInfo;
+        std::vector<objects> objs;
+        Screen backBuffer;
+        Screen frontBuffer;
+        objColor bgColor;
+        std::function<void(ERRORS , const std::string&)> handleErrors;
+
+        Discky();
+        void callErrorHandle(ERRORS error , const std::string& msg) const;
+        void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
+        void setBackground(const objColor& color);
+        objects& drawRec(const Coordinate& a , const Coordinate& b , const objColor& color);
+        void render();
+        void display();
+        void refresh();
+        
 };
 
-void callErrorHandle(const Discky* discky , const ERRORS error , char* msg);
-void renderDiscky(Discky* discky);
-void clearGarbge(Discky* discky);
-void displayDiscky(Discky* discky);
-void iniDiscky(Discky* discky);
-void refreshDiscky(Discky* discky);
-void endDiscky(Discky* discky);
-objects* disckyDrawRec(Discky* discky , const coordinate x , const coordinate y , const objColor color);
-void displayDiscky(Discky* discky);
-void setErrorHandleFunc(Discky* discky , void (*handleError)(ERRORS error , char* msg));
-void setDisckyBackground(Discky* discky , const objColor color);
+void iniTerminal();
+
+// void callErrorHandle(const Discky* discky , const ERRORS error , char* msg);
+// void renderDiscky(Discky* discky);
+// void clearGarbge(Discky* discky);
+// void displayDiscky(Discky* discky);
+// void iniDiscky(Discky* discky);
+// void refreshDiscky(Discky* discky);
+// void endDiscky(Discky* discky);
+// objects* disckyDrawRec(Discky* discky , const coordinate x , const coordinate y , const objColor color);
+// void displayDiscky(Discky* discky);
+// void setErrorHandleFunc(Discky* discky , void (*handleError)(ERRORS error , char* msg));
+// void setDisckyBackground(Discky* discky , const objColor color);
 
 
 #include "colors.h"

@@ -20,6 +20,12 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     int bx = std::min(a.x , b.x);
     int by = std::max(a.y , b.y);
 
+    bx = std::max(bx , 0);
+    by = std::min(by , discky.terminalInfo.y -1);
+    tx = std::min(tx , discky.terminalInfo.x -1);
+    ty = std::max(ty , 0);
+
+    if((bx>tx)||(ty>by))return;
 
     for(int i=ty ; i<=by ; i++){
         for(int j=bx ; j<=tx ; j++)discky.frontBuffer.pixels[i*discky.terminalInfo.x + j] = obj.color;
@@ -50,6 +56,9 @@ void Discky::render(){
         renderNewBg(*this ,  Info.x ,Info.y , frontBuffer);
         renderNewBg(*this , Info.x , Info.y , backBuffer);
         forceRedraw=1;
+    }
+    else {
+        std::fill(frontBuffer.pixels.begin() , frontBuffer.pixels.end() , bgColor);
     }
 
     for(auto& obj:objs)renderObj(*this , obj);

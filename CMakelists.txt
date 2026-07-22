@@ -29,5 +29,7 @@ target_include_directories(discky
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_executable(first example/first.cpp)
-target_link_libraries(first PRIVATE discky)
+add_executable(1 example/1.cpp)
+add_executable(2 example/2.cpp)
+target_link_libraries(1 PRIVATE discky)
+target_link_libraries(2 PRIVATE discky)

@@ -24,25 +24,26 @@ enum class objType{
 enum ERRORS{
     OUT_OF_MEM,
     TERMINAL_INFO,
-
+    INVALID_INPUT,
     INTERNAL,
 };
 
-enum CoordinateType{
-    TERMINAL_SCREEN,
-    NORMALIZED
+enum unitType{
+    COOR_PIX,
+    COOR_NOR,
+    LEN_PIX,
 };
 
 struct Coordinate{
-    CoordinateType type;
+    unitType type;
     int x;
     int y;
     double norX;
     double norY;
 };
-
-inline Coordinate NOR_COORD(double a, double b){return Coordinate{CoordinateType::NORMALIZED , -1 , -1 , a , b};}
-inline Coordinate SCR_COORD(int a , int b){return Coordinate{CoordinateType::TERMINAL_SCREEN ,a , b , -1 , -1};}
+inline Coordinate NOR_COORD(double a, double b){return Coordinate{unitType::COOR_NOR , -1 , -1 , a , b};}
+inline Coordinate SCR_COORD(int a , int b){return Coordinate{unitType::COOR_PIX ,a , b , -1 , -1};}
+inline Coordinate SCR_LENGTH(int a){return Coordinate{unitType::LEN_PIX , a , -1, -1 , -1 };}
 struct objColor{
     int r;
     int g;
@@ -53,6 +54,7 @@ struct objects{
     std::vector<Coordinate> vertex;
     objType type;
     objColor color;
+    bool removed=0;
 };
 
 struct Screen{
@@ -88,9 +90,11 @@ class Discky{
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
         objects& drawRec(const Coordinate& a , const Coordinate& b , const objColor& color);
+        objects& drawCircle(const Coordinate& a , const Coordinate& r , const objColor& color);
         void render();
         void display();
         void refresh();
+        std::vector<int> objRecycleBin;
         
 };
 

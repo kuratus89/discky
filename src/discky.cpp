@@ -24,9 +24,6 @@ Discky::Discky(){
     bgColor = DISCKY_COLOR_BLACK;
 }
 
-
-
-
 void Discky::callErrorHandle(const ERRORS error ,  const std::string& msg)const{
     if(handleErrors)handleErrors(error , msg);
     std::exit(0);
@@ -40,11 +37,16 @@ void Discky::setBackground(const objColor&  color){
     bgColor = color;
 }
 
-
-
-
-
-
+static objects& recycleObjPush(Discky& discky ,objects& obj){
+    if(discky.objRecycleBin.size()>0){
+        int it = discky.objRecycleBin.back();
+        discky.objRecycleBin.pop_back();
+        discky.objs[it] = obj;
+        return discky.objs[it];
+    }
+    discky.objs.push_back(obj);
+    return discky.objs.back();
+}
 
 objects& Discky::drawRec(const Coordinate& a , const Coordinate& b ,const objColor& color){
     objects obj;
@@ -52,12 +54,17 @@ objects& Discky::drawRec(const Coordinate& a , const Coordinate& b ,const objCol
     obj.type = objType::RECTANGLE;
     obj.vertex.push_back(a);
     obj.vertex.push_back(b);
-    objs.push_back(obj);
-    return objs.back();
+    return recycleObjPush(*this , obj);
 }
 
-
-
+objects& Discky::drawCircle(const Coordinate& a , const Coordinate& r , const objColor& color){
+    objects obj;
+    obj.color = color;
+    obj.type = objType::CIRCLE;
+    obj.vertex.push_back(a);
+    obj.vertex.push_back(r);
+    return recycleObjPush(*this , obj);
+}
 void Discky::refresh(){
     objs.clear();
 }

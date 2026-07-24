@@ -2,18 +2,12 @@
 
 #include "types.h"
 #include "window.h"
-// #include "memory.h"
 #include <vector>
 #include <string>
 #include <functional>
-// #include "screen.h"
-// #include <locale.h>
-
-// #define NOR_COORD(A,B) (coordinate){COORD_NORMALIZED , -1 , -1 , A , B}
-// #define SCR_COORD(A,B) (coordinate){COORD_TERMINAL_SCREEN , A, B , -1 , -1}
-
 enum class objType{
     TRIANGLE,
+    RECTANGLE_HORIZONTAL,
     RECTANGLE,
     CIRCLE,
     LINE,
@@ -49,33 +43,18 @@ struct objColor{
     int g;
     int b;
 };
-
 struct objects{
     std::vector<Coordinate> vertex;
     objType type;
     objColor color;
     bool removed=0;
+    void removeObj();
 };
-
 struct Screen{
     int x=0;
     int y=0;
     std::vector<objColor> pixels;
 };
-
-
-
-// struct Discky{
-//     TerminalInfo terminalInfo;
-//     Vec objs; // vector of objects
-//     Screen* backBuffer;
-//     Screen* frontBuffer;
-//     objColor bgColor;
-//     Vec garbge;
-//     void (*handleErrors)(ERRORS error , char* msg);
-    
-// };
-
 class Discky{
     public:
         TerminalInfo terminalInfo;
@@ -89,29 +68,19 @@ class Discky{
         void callErrorHandle(ERRORS error , const std::string& msg) const;
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
-        objects& drawRec(const Coordinate& a , const Coordinate& b , const objColor& color);
-        objects& drawCircle(const Coordinate& a , const Coordinate& r , const objColor& color);
+        objects& drawRectangleHorizontal(const Coordinate& a , const Coordinate& b , const objColor& color);
+        objects& drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color);
+        objects& drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color);
+        objects& drawLine(const Coordinate& a , const Coordinate& b, const objColor& color);
+
         void render();
         void display();
         void refresh();
+        int getTerminalSizeX();
+        int getTerminalSizeY();
         std::vector<int> objRecycleBin;
         
 };
-
 void iniTerminal();
-
-// void callErrorHandle(const Discky* discky , const ERRORS error , char* msg);
-// void renderDiscky(Discky* discky);
-// void clearGarbge(Discky* discky);
-// void displayDiscky(Discky* discky);
-// void iniDiscky(Discky* discky);
-// void refreshDiscky(Discky* discky);
-// void endDiscky(Discky* discky);
-// objects* disckyDrawRec(Discky* discky , const coordinate x , const coordinate y , const objColor color);
-// void displayDiscky(Discky* discky);
-// void setErrorHandleFunc(Discky* discky , void (*handleError)(ERRORS error , char* msg));
-// void setDisckyBackground(Discky* discky , const objColor color);
-
-
 #include "colors.h"
 #include "render.h"

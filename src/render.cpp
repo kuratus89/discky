@@ -18,8 +18,11 @@ static void drawRange(Discky& discky , int a , int b , int y , objColor color){
     b = std::min(b , discky.terminalInfo.x-1);
     for(int i=a ;i<=b ; i++)discky.frontBuffer.pixels[y*discky.terminalInfo.x + i] = color;
 }
+static void drawPoint(Discky& discky , int x , int y , objColor color){
+    discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
+}
 
-static void renderRectangleObj(Discky& discky , objects& obj){
+static void renderRectangleHorizontalObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL ,  "vertex underflow");
     Coordinate& a = obj.vertex[0];
     Coordinate& b = obj.vertex[1];
@@ -39,7 +42,8 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     if((bx>tx)||(ty>by))return;
 
     for(int i=ty ; i<=by ; i++){
-        for(int j=bx ; j<=tx ; j++)discky.frontBuffer.pixels[i*discky.terminalInfo.x + j] = obj.color;
+        // for(int j=bx ; j<=tx ; j++)discky.frontBuffer.pixels[i*discky.terminalInfo.x + j] = obj.color;
+        drawRange(discky , bx , tx , i , obj.color);
     }
 }
 
@@ -70,10 +74,44 @@ static void renderCircleObj(Discky& discky , objects& obj){
     }
 }
 
+static void renderLine(Discky& discky , objects& obj){
+    Coordinate& a = obj.vertex[0];
+    Coordinate& b = obj.vertex[1];
+    normalizedToScreen(discky , a);
+    normalizedToScreen(discky , b);
+    int x1 = a.x;
+    int y1 = a.y;
+    int x2 = b.x;
+    int y2 = b.y;
+    int dx = abs(x2 - x1);
+    int dy = abs(y2-y1);
+    int err = dx - dy;
+    int sx , sy;
+    if(x1<x2)sx=1;
+    else sx=-1;
+    if(y1<y2)sy=1;
+    else sy=-1;
+    while(1){
+        drawPoint(discky , x1 , y1 , obj.color);
+        if((x1 ==x2)&&(y1==y2))break;
+        int e2 = err*2;
+        if(e2>-dy){
+            err -= dy;
+            x1+=sx;
+        }
+        if(e2<dx){
+            err+=dx;
+            y1+=sy;
+        }        
+    }
+}
+
 static void renderObj(Discky& discky , objects& obj){
+    if(obj.removed)return;
     switch(obj.type){
-        case (objType::RECTANGLE):renderRectangleObj(discky , obj);break;
+        case (objType::RECTANGLE_HORIZONTAL):renderRectangleHorizontalObj(discky , obj);break;
         case (objType::CIRCLE):renderCircleObj(discky , obj);break;
+        case (objType::LINE):renderLine(discky , obj);break;
         default: break;
     }
 }

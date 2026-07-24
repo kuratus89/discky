@@ -11,13 +11,11 @@ int main(){
     Discky discky;
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLUE);
-
+    discky.drawRectangleHorizontal(NOR_COORD(-0.5 , -0.5) , NOR_COORD(0.5 , 0.5) , DISCKY_COLOR_RED);
     while(true){
-        discky.drawRec(NOR_COORD(-0.5 , -0.5) , NOR_COORD(0.5 , 0.5) , DISCKY_COLOR_RED);
         discky.render();
         discky.display();
-        discky.refresh();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
 }

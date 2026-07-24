@@ -48,23 +48,48 @@ static objects& recycleObjPush(Discky& discky ,objects& obj){
     return discky.objs.back();
 }
 
-objects& Discky::drawRec(const Coordinate& a , const Coordinate& b ,const objColor& color){
+objects& Discky::drawRectangleHorizontal(const Coordinate& a , const Coordinate& b ,const objColor& color){
     objects obj;
+    obj.vertex.reserve(2);
     obj.color = color;
-    obj.type = objType::RECTANGLE;
+    obj.type = objType::RECTANGLE_HORIZONTAL;
     obj.vertex.push_back(a);
     obj.vertex.push_back(b);
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawCircle(const Coordinate& a , const Coordinate& r , const objColor& color){
+objects& Discky::drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color){
     objects obj;
+    obj.vertex.reserve(2);
     obj.color = color;
     obj.type = objType::CIRCLE;
     obj.vertex.push_back(a);
-    obj.vertex.push_back(r);
+    obj.vertex.push_back(SCR_LENGTH(radiusPixels));
     return recycleObjPush(*this , obj);
 }
+
+objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objColor& color){
+    objects obj;
+    obj.vertex.reserve(2);
+    obj.color = color;
+    obj.type = objType::LINE;
+    obj.vertex.push_back(a);
+    obj.vertex.push_back(b);
+    return recycleObjPush(*this , obj);
+}
+
+int Discky::getTerminalSizeX(){
+    return terminalInfo.x;
+}
+
+int Discky::getTerminalSizeY(){
+    return terminalInfo.y;
+}
+
 void Discky::refresh(){
     objs.clear();
+}
+
+void objects::removeObj(){
+    removed=1;
 }

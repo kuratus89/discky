@@ -78,6 +78,18 @@ objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objCo
     return recycleObjPush(*this , obj);
 }
 
+objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const Coordinate& d , const objColor& color){
+    objects obj;
+    obj.vertex.reserve(4);
+    obj.color = color;
+    obj.type = objType::RECTANGLE;
+    obj.vertex.push_back(a);
+    obj.vertex.push_back(b);
+    obj.vertex.push_back(c);
+    obj.vertex.push_back(d);
+    return recycleObjPush(*this , obj);
+}
+
 int Discky::getTerminalSizeX(){
     return terminalInfo.x;
 }

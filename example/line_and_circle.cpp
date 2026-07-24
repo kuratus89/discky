@@ -18,6 +18,8 @@ int main(){
     discky.drawCircle(NOR_COORD(-0.5 , 0.5) , 8 , DISCKY_COLOR_RED);
     discky.drawCircle(NOR_COORD(0.5 , -0.5) , 8 , DISCKY_COLOR_GREEN);
     discky.drawCircle(NOR_COORD(0.5 , 0.5) , 8 , DISCKY_COLOR_BLACK);
+    // discky.drawLine(NOR_COORD(-1,-1) , NOR_COORD(1,1) , DISCKY_COLOR_BLACK);
+    // discky.drawLine(NOR_COORD(1 ,-1) , NOR_COORD(-1 , 1) , DISCKY_COLOR_BLACK);
     while(true){
         discky.render();
         discky.display();

@@ -87,6 +87,14 @@ objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &c
     for(int i=0 ; i<ver.size() ; i++)obj.vertex[i] = ver[i];
     return recycleObjPush(*this , obj);
 }
+
+objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor & color){
+    objects obj;
+    obj.vertex = {a , b , c};
+    obj.color = color;
+    obj.type = objType::TRIANGLE;
+    return recycleObjPush(*this , obj);
+}
 int Discky::getTerminalSizeX(){
     return terminalInfo.x;
 }

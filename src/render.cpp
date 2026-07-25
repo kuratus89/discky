@@ -23,6 +23,22 @@ static void drawPoint(Discky& discky , int x , int y , objColor color){
     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
 }
 
+static void fillFlatTriangle(Discky& discky , double& x1 , double& y1 , double& x2 , double& y2 , double& x3 , double& y3 ,const objColor& color){
+    int sy = std::max(0 , (int)ceil(std::min(y1 , y2)));
+    int ey = std::min(discky.terminalInfo.y -1 , (int)std::floor(std::max(y1 , y2)));
+    if(y1==y2)return;
+
+    double is1 = (x2 - x1)/(y2 - y1);
+    double is2 = (x3 - x1)/(y3 - y1);
+
+    for(int y = sy ; y<= ey ; y++){
+        double t = y - y1;
+        double xa = x1 + (is1*t);
+        double xb = x1 + (is2*t);
+        drawRange(discky , (int)std::round(std::min(xa , xb)) , (int)std::round(std::max(xa ,xb)) , y , color);
+    }
+}
+
 static void renderRectangleHorizontalObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL ,  "vertex underflow");
     Coordinate& a = obj.vertex[0];
@@ -142,6 +158,39 @@ static void renderPoly(Discky& discky , objects& obj){
     }
 }
 
+static void renderTriangleObj(Discky& discky , objects& obj){
+    if(obj.vertex.size()<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
+    for(int i=0 ; i<3 ; i++)normalizedToScreen(discky , obj.vertex[i]);
+
+    double x1 = obj.vertex[0].x;
+    double x2 = obj.vertex[1].x;
+    double x3 = obj.vertex[2].x;
+    double y1 = obj.vertex[0].y;
+    double y2 = obj.vertex[1].y;
+    double y3 = obj.vertex[2].y;
+
+    if(y1>y2){
+        std::swap(x1 , x2);
+        std::swap(y1 ,y2);
+    }
+    if(y2>y3){
+        std::swap(x2 , x3);
+        std::swap(y2 , y3);
+    }
+    if(y1>y2){
+        std::swap(x1 , x2);
+        std::swap(y1 , y2);
+    }
+
+    if(y2==y3)fillFlatTriangle(discky , x1 , y1 , x2 , y2 , x3 , y3 , obj.color);
+    else if(y1==y2)fillFlatTriangle(discky , x3 , y3 , x1 , y1 ,x2 , y2 , obj.color);
+    else {
+        double xs = x1 + (((y2 - y1)/(y3 - y1)) *(x3 - x1));
+        fillFlatTriangle(discky , x1 , y1 , x2 , y2 , xs , y2 , obj.color);
+        fillFlatTriangle(discky , x3 , y3 , x2 , y2 , xs , y2 , obj.color);
+    }
+}
+
 static void renderObj(Discky& discky , objects& obj){
     if(obj.removed)return;
     switch(obj.type){
@@ -149,6 +198,7 @@ static void renderObj(Discky& discky , objects& obj){
         case (objType::CIRCLE):renderCircleObj(discky , obj);break;
         case (objType::LINE):renderLine(discky , obj);break;
         case (objType::POLY):renderPoly(discky , obj);break;
+        case (objType::TRIANGLE):renderTriangleObj(discky , obj); break;
         default: break;
     }
 }

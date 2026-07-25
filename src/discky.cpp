@@ -48,11 +48,11 @@ static objects& recycleObjPush(Discky& discky ,objects& obj){
     return discky.objs.back();
 }
 
-objects& Discky::drawRectangleHorizontal(const Coordinate& a , const Coordinate& b ,const objColor& color){
+objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const objColor& color){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
-    obj.type = objType::RECTANGLE_HORIZONTAL;
+    obj.type = objType::RECTANGLE;
     obj.vertex.push_back(a);
     obj.vertex.push_back(b);
     return recycleObjPush(*this , obj);
@@ -78,18 +78,15 @@ objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objCo
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const Coordinate& d , const objColor& color){
+objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &color){
     objects obj;
-    obj.vertex.reserve(4);
+    if(ver.size()==0)callErrorHandle(ERRORS::INVALID_INPUT , "invalid numbers of vertex for poly");
+    obj.vertex.resize(ver.size());
     obj.color = color;
-    obj.type = objType::RECTANGLE;
-    obj.vertex.push_back(a);
-    obj.vertex.push_back(b);
-    obj.vertex.push_back(c);
-    obj.vertex.push_back(d);
+    obj.type = objType::POLY;
+    for(int i=0 ; i<ver.size() ; i++)obj.vertex[i] = ver[i];
     return recycleObjPush(*this , obj);
 }
-
 int Discky::getTerminalSizeX(){
     return terminalInfo.x;
 }

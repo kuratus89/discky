@@ -11,7 +11,7 @@ int main(){
     Discky discky;
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLUE);
-    discky.drawRectangleHorizontal(NOR_COORD(-0.5 , -0.5) , NOR_COORD(0.5 , 0.5) , DISCKY_COLOR_RED);
+    discky.drawRectangle(NOR_COORD(-0.5 , -0.5) , NOR_COORD(0.5 , 0.5) , DISCKY_COLOR_RED);
     while(true){
         discky.render();
         discky.display();

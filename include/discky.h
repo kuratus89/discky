@@ -7,10 +7,10 @@
 #include <functional>
 enum class objType{
     TRIANGLE,
-    RECTANGLE_HORIZONTAL,
     RECTANGLE,
     CIRCLE,
     LINE,
+    POLY,
     IMAGE,
     RAW_TEXT,
 };
@@ -68,12 +68,11 @@ class Discky{
         void callErrorHandle(ERRORS error , const std::string& msg) const;
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
-        objects& drawRectangleHorizontal(const Coordinate& a , const Coordinate& b , const objColor& color);
-        objects& drawRectangle(const Coordinate& a, const Coordinate& b ,const  Coordinate& c ,const Coordinate& d , const objColor& color);
+        objects& drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color);
         objects& drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color);
         objects& drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color);
         objects& drawLine(const Coordinate& a , const Coordinate& b, const objColor& color);
-
+        objects& drawPoly(const std::vector<Coordinate> &ver ,const objColor &color);
         void render();
         void display();
         void refresh();

@@ -20,7 +20,7 @@ int main(){
     double speedy = 0.05;
 
     while(true){
-        discky.drawRectangleHorizontal(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
+        discky.drawRectangle(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
         discky.render();
         discky.display();
         discky.refresh();

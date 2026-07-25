@@ -107,51 +107,48 @@ static void renderLine(Discky& discky , objects& obj){
     }
 }
 
-static void renderRectangle(Discky& discky , objects& obj){
-    std::vector<double> cx(4) , cy(4);
-    for(int i=0 ; i<4 ; i++){
+static void renderPoly(Discky& discky , objects& obj){
+    int n = obj.vertex.size();
+    if(n<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
+    std::vector<double> cx(n) , cy(n);
+    for(int i=0 ; i<n ; i++){
         normalizedToScreen(discky , obj.vertex[i]);
         cx[i] = obj.vertex[i].x;
         cy[i] = obj.vertex[i].y;
     }
-    double fymin = cy[0];
-    double fymax = cy[0];
-
-    for(int i=1 ; i<4 ; i++){
+    double fymin = cy[0] , fymax = cy[0];
+    for(int i=1 ; i<n ; i++){
         fymin = std::min(fymin , cy[i]);
         fymax = std::max(fymax , cy[i]);
     }
-    int sy = std::max(0 , (int) std::ceil(fymin));
-    int ey = std::min(discky.terminalInfo.y -1 ,(int)std::floor(fymax));
-
-    for(int y = sy; y<=ey ; y++){
-        std::vector<double> sx(4);
-        int n=0;
-        for(int i=0 ; i<4 ; i++){
-            int j = (i+1)%4;
-            double y0 = cy[i] , y1 = cy[j];
+    int sy = std::max(0 ,(int) std::ceil(fymin));
+    int ey = std::min(discky.terminalInfo.y -1 , (int)std::floor(fymax));
+    std::vector<double> sx(n);
+    for(int y = sy ; y<=ey ; y++){
+        int cnt=0;
+        for(int i=0 ; i<n ; i++){
+            int j = (i+1)%n;
+            double y0 = cy[i];
+            double y1 = cy[j];
             if(y0==y1)continue;
             if((y>=std::min(y0 , y1))&&(y<std::max(y0 , y1))){
-                sx[n]= cx[i] + ((y - y0)/(y1 - y0))*(cx[j] - cx[i]);
-                n++;
+                sx[cnt] = cx[i] + ((y - y0)/(y1 - y0))*(cx[j]- cx[i]);
+                cnt++;
             }
-            
         }
-        if(n<2)continue;
-        std::sort(sx.begin() , sx.begin()+n);
-        for(int k=0; k+1<n ; k+=2){
-            drawRange(discky , (int)std::round(sx[k]) , (int)std::round(sx[k+1]) , y , obj.color);
-        }
+        if(cnt<2)continue;
+        std::sort(sx.begin() , sx.begin()+cnt);
+        for(int k=0 ; (k+1)<cnt ; k+=2)drawRange(discky , (int)std::round(sx[k]) , (int)std::round(sx[k+1]) , y , obj.color);
     }
 }
 
 static void renderObj(Discky& discky , objects& obj){
     if(obj.removed)return;
     switch(obj.type){
-        case (objType::RECTANGLE_HORIZONTAL):renderRectangleHorizontalObj(discky , obj);break;
+        case (objType::RECTANGLE):renderRectangleHorizontalObj(discky , obj);break;
         case (objType::CIRCLE):renderCircleObj(discky , obj);break;
         case (objType::LINE):renderLine(discky , obj);break;
-        case (objType::RECTANGLE):renderRectangle(discky , obj);break;
+        case (objType::POLY):renderPoly(discky , obj);break;
         default: break;
     }
 }

@@ -365,6 +365,57 @@ static void renderLine(Discky& discky , objects& obj){
     raster(discky , obj , minX , maxX , minY , maxY , tsi);
 }
 
+static double triSign(double x1 , double y1 , double x2 , double y2 , double x3 , double y3){
+    return ((x1-x3)*(y2 - y3))- ((x2- x3)*(y1-y3));
+}
+
+static bool pointInTriangle(double px , double py , double ax , double ay , double bx , double by , double cxx , double cyy){
+    double d1 =triSign(px , py , ax , ay , bx , by);
+    double d2 =triSign(px , py , bx , by , cxx , cyy);
+    double d3 = triSign(px , py , cxx , cyy , ax , ay);
+    bool hasNeg = (d1<0)||(d2<0)||(d3<0);
+    bool hasPos = (d1>0)||(d2>0)||(d3>0);
+    return (!(hasNeg && hasPos));
+}
+
+static int renderTriangleObj(Discky& discky , objects& obj){
+    if(obj.vertex.size()<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
+    for(int i=0 ; i<3 ; i++)normalizedToScreen(discky , obj.vertex[i]);
+
+    double x1 = obj.vertex[0].x;
+    double x2 = obj.vertex[1].x;
+    double x3 = obj.vertex[2].x;
+    double y1 = obj.vertex[0].y;
+    double y2 = obj.vertex[1].y;
+    double y3 = obj.vertex[2].y;
+
+    double mx = (x1+x2+x3)/3.0;
+    double my = (y1 + y2+ y3)/3.0;
+
+    bool hasBorder = obj.boder<1.0;
+    double scale = 1.0 - obj.boder;
+    double ix1 = mx + ((x1 - mx)*scale);
+    double ix2 = mx + ((x2 - mx)*scale);
+    double ix3 = mx + ((x3 -mx )*scale);
+    double iy1 = my + ((y1 - my)*scale);
+    double iy2 = my + ((y2 - my)*scale);
+    double iy3 = my + ((y3 - my)*scale);
+
+    ist tsi = [=](double px , double py)->bool{
+        if(!pointInTriangle(px , py , x1 , y1 , x2 , y2 , x3 , y3))return 0;
+        if(hasBorder && pointInTriangle(px , py , ix1 , iy1  , ix2 , iy2 , ix3 , iy3))return 0;
+        return 1;
+    };
+
+    int minX = (int)std::floor(std::min({x1 , x2 , x3}));
+    int maxX = (int)std::ceil(std::max({x1 , x2 , x3}));
+    int minY = (int)std::floor(std::min({y1 , y2 , y3}));
+    int maxY = (int)std::ceil(std::max({y1 , y2 , y3}));
+    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+}
+
+
+
 static void renderObj(Discky& discky , objects& obj){
     if(obj.removed)return;
     switch(obj.type){

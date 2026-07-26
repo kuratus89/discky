@@ -48,52 +48,70 @@ static objects& recycleObjPush(Discky& discky ,objects& obj){
     return discky.objs.back();
 }
 
-objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const objColor& color){
+objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const objColor& color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
     obj.type = objType::RECTANGLE;
+    obj.boder = std::max(0.0 , std::min(1.0 , boder));
+    obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
     obj.vertex.push_back(a);
     obj.vertex.push_back(b);
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color){
+objects& Discky::drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
     obj.type = objType::CIRCLE;
+    obj.boder = std::max(0.0 , std::min(1.0 , boder));
+    obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
     obj.vertex.push_back(a);
     obj.vertex.push_back(SCR_LENGTH(radiusPixels));
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objColor& color){
+objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objColor& color , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
     obj.type = objType::LINE;
+    obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
     obj.vertex.push_back(a);
     obj.vertex.push_back(b);
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &color){
+objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &color , const double& boder , const double& opacity){
     objects obj;
     if(ver.size()==0)callErrorHandle(ERRORS::INVALID_INPUT , "invalid numbers of vertex for poly");
     obj.vertex.resize(ver.size());
     obj.color = color;
     obj.type = objType::POLY;
+    obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
+    obj.boder = std::max(0.0 , std::min(1.0 , boder));
     for(int i=0 ; i<ver.size() ; i++)obj.vertex[i] = ver[i];
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor & color){
+objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor & color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex = {a , b , c};
     obj.color = color;
     obj.type = objType::TRIANGLE;
+    obj.boder = std::max(0.0 , std::min(1.0 , boder));
+    obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
     return recycleObjPush(*this , obj);
+}
+
+void Discky::setAntiAliasing(const antiAliasing& mode){
+    aaMode = mode;
+}
+
+void Discky::removeObj(objects& obj){
+    obj.removed=1;
+    objRecycleBin.push_back(&obj - objs.data());
 }
 int Discky::getTerminalSizeX(){
     return terminalInfo.x;

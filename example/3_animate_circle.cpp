@@ -12,7 +12,7 @@ int main(){
     Discky discky;
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLUE);
-
+    discky.setAntiAliasing(antiAliasing::AA_HIGH);
     double x = -0.5;
     double y = 0.0;
 

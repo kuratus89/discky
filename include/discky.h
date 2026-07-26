@@ -79,7 +79,7 @@ class Discky{
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
         objects& drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color , const double& boder =1.0 , const double& opacity =1.0);
-        objects& drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
+        objects& drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
         objects& drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
         objects& drawLine(const Coordinate& a , const Coordinate& b, const objColor& color , const double& opacity= 1.0);
         objects& drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& boder =1.0 , const double& opacity = 1.0);

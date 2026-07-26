@@ -60,7 +60,7 @@ objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const 
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawCircle(const Coordinate& a , const int radiusPixels , const objColor& color , const double& boder , const double& opacity){
+objects& Discky::drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
@@ -68,7 +68,7 @@ objects& Discky::drawCircle(const Coordinate& a , const int radiusPixels , const
     obj.boder = std::max(0.0 , std::min(1.0 , boder));
     obj.opacity = std::max(0.0 , std::min(1.0 , opacity));
     obj.vertex.push_back(a);
-    obj.vertex.push_back(SCR_LENGTH(radiusPixels));
+    obj.vertex.push_back(b);
     return recycleObjPush(*this , obj);
 }
 

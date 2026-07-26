@@ -30,10 +30,10 @@ static void blendPoint(Discky& discky , int x , int y , const objColor& color , 
         discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
         return;
     }
-    if(alpha<=1.0){
-        discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
-        return;
-    }
+    // if(alpha<=1.0){
+    //     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
+    //     return;
+    // }
     if(alpha<=0.0)return;
     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = blendColor(discky.frontBuffer.pixels[y*discky.terminalInfo.x + x], color , alpha);
 }
@@ -230,6 +230,7 @@ static int aaSamples(const antiAliasing& mode){
         case (antiAliasing::AA_HIGH):return 8;
         case (antiAliasing::AA_NONE):return 1;
     }
+    return 1;
 }
 
 static double sampleCoverage(const ist& tsi , int x , int y , int n){
@@ -255,7 +256,7 @@ static void raster(Discky& discky , const objects& obj , int minX , int maxX, in
     for(int y= minY ; y<=maxY ; y++){
         for(int x = minX ; x<=maxX ; x++){
             if(n<=1){
-                if(tsi(x+0.5 , y+0.55))blendPoint(discky , x , y , obj.color , obj.opacity);
+                if(tsi(x+0.5 , y+0.5))blendPoint(discky , x , y , obj.color , obj.opacity);
                 continue;
             }
             bool cx1 = tsi(x , y);
@@ -271,7 +272,7 @@ static void raster(Discky& discky , const objects& obj , int minX , int maxX, in
     }
 }
 
-static void renderRectangleObj(Discky discky , objects& obj){
+static void renderRectangleObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL ,"vertex underflow");
     normalizedToScreen(discky , obj.vertex[0]);
     normalizedToScreen(discky , obj.vertex[1]);
@@ -308,6 +309,7 @@ static void renderRectangleObj(Discky discky , objects& obj){
     }
 }
 
+
 static void renderCircleObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "veretx underflow");
     normalizedToScreen(discky , obj.vertex[0]);
@@ -317,7 +319,7 @@ static void renderCircleObj(Discky& discky , objects& obj){
     if(obj.boder<1.0) ir = r*(1.0 - obj.boder);
     else ir = 0.0;
     double cx = obj.vertex[0].x;
-    double cy = obj.vertex[1].y;
+    double cy = obj.vertex[0].y;
 
     ist tsi = [cx , cy , r , ir](double px , double py )->bool{
         double dx = px - cx;
@@ -378,7 +380,7 @@ static bool pointInTriangle(double px , double py , double ax , double ay , doub
     return (!(hasNeg && hasPos));
 }
 
-static int renderTriangleObj(Discky& discky , objects& obj){
+static void renderTriangleObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
     for(int i=0 ; i<3 ; i++)normalizedToScreen(discky , obj.vertex[i]);
 
@@ -414,7 +416,64 @@ static int renderTriangleObj(Discky& discky , objects& obj){
     raster(discky , obj , minX , maxX , minY , maxY , tsi);
 }
 
+static bool pointInPoly(double px , double py , const std::vector<double>& vx , const std::vector<double>& vy){
+    int n = (int)vx.size();
+    bool ins = 0;
+    for(int i=0 , j=n-1 ; i<n ; j=i , i++){
+        if((vy[i]>py)!=(vy[j]>py)){
+            double xi = (vx[j] - vx[i])* ((py -vy[i])/(vy[j] - vy[i])) + vx[i];
+            if(px<xi)ins = !ins;
+        }        
+    }
+    return ins;
+}
 
+static void renderPoly(Discky& discky , objects obj){
+    int n = obj.vertex.size();
+    if(n<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
+    std::vector<double> cx(n) , cy(n);
+    for(int i=0 ; i<n ; i++){
+        normalizedToScreen(discky , obj.vertex[i]);
+        cx[i] = obj.vertex[i].x;
+        cy[i] = obj.vertex[i].y;
+    }
+    double fxMin = cx[0];
+    double fxMax = cx[0];
+    double fyMin = cy[0];
+    double fyMax = cy[0];
+    double centerX = 0.0;
+    double centerY = 0.0;
+    for(int i=0 ; i<n ; i++){
+        fxMin = std::min(fxMin , cx[i]);
+        fxMax = std::max(fxMax , cx[i]);
+        fyMin = std::min(fyMin , cy[i]);
+        fyMax = std::max(fyMax , cy[i]);
+        centerX+=cx[i];
+        centerY+=cy[i];
+    }
+    centerX/=n;
+    centerY/=n;
+    
+    bool hasBoder = obj.boder<1.0;
+    std::vector<double> xi(n) , yi(n);
+    double scale = 1.0 - obj.boder;
+    if(hasBoder){
+        for(int i=0 ; i<n ; i++){
+            xi[i] = centerX + ((cx[i] - centerX)*scale);
+            yi[i] =centerY + ((cy[i] - centerY)*scale);
+        }
+    }
+    ist tsi = [&cx ,&cy , &xi , &yi , hasBoder](double px , double py)->bool{
+        if(!pointInPoly(px , py , cx ,cy))return 0;
+        if(hasBoder && pointInPoly(px , py , xi , yi))return 0;
+        return 1;
+    };
+    int minX = (int)std::floor(fxMin);
+    int maxX = (int)std::ceil(fxMax);
+    int minY = (int)std::floor(fyMin);
+    int maxY = (int)std::ceil(fyMax);
+    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+}
 
 static void renderObj(Discky& discky , objects& obj){
     if(obj.removed)return;

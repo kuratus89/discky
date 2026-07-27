@@ -11,8 +11,6 @@ enum class objType{
     CIRCLE,
     LINE,
     POLY,
-    IMAGE,
-    RAW_TEXT,
 };
 
 enum ERRORS{
@@ -26,6 +24,7 @@ enum unitType{
     COOR_PIX,
     COOR_NOR,
     LEN_PIX,
+    LEN_NOR,
 };
 enum class antiAliasing{
     AA_NONE,
@@ -43,7 +42,10 @@ struct Coordinate{
 };
 inline Coordinate NOR_COORD(double a, double b){return Coordinate{unitType::COOR_NOR , -1 , -1 , a , b};}
 inline Coordinate SCR_COORD(int a , int b){return Coordinate{unitType::COOR_PIX ,a , b , -1 , -1};}
-inline Coordinate SCR_LENGTH(int a){return Coordinate{unitType::LEN_PIX , a , -1, -1 , -1 };}
+inline Coordinate SCR_LEN_MONO(int x){return Coordinate{unitType::LEN_PIX , x , -1 , -1 , -1};}
+inline Coordinate NOR_LEN_MONO(double x){return Coordinate{unitType::LEN_NOR , -1 , -1 , x , -1};}
+inline Coordinate SCR_LEN_DI(int a , int b){return Coordinate{unitType::LEN_PIX , a , b , -1 , -1};}
+inline Coordinate NOR_LEN_DI(double a , double b){return Coordinate{unitType::LEN_NOR , -1 , -1 , a , b};}
 struct objColor{
     int r;
     int g;
@@ -99,6 +101,7 @@ class Discky{
         std::vector<int> objRecycleBin;
         
 };
+bool checkOverlap(const objects& a, const objects& b);
 void iniTerminal();
 #include "colors.h"
 #include "render.h"

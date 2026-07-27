@@ -4,21 +4,35 @@
 #include <cmath>
 #include <functional>
 using ist = std::function<bool(double , double)>;
+
+
+static void normalizedToScreenLength(Discky& discky , Coordinate& coor){
+    
+    if(coor.type ==LEN_PIX){
+        if(coor.y==-1)coor.y = coor.x;
+        return;
+    }
+
+    if(coor.norY ==-1){
+        int m = std::min(discky.terminalInfo.x  ,discky.terminalInfo.y) -1;
+        coor.x = coor.y = (coor.norX * m);
+        return;
+    }
+    coor.x = (coor.norX * (discky.terminalInfo.x-1));
+    coor.y = (coor.norY * (discky.terminalInfo.y -1));
+}
+
 static void normalizedToScreen(Discky& discky ,Coordinate& coor){
     if(coor.type == COOR_PIX)return;
+    if((coor.type == LEN_NOR)||(coor.type ==LEN_PIX)){
+        normalizedToScreenLength(discky , coor);
+        return;
+    }
     
 
     coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
     coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1))/ (double)2.0;
 }
-
-static void normalizedToScreenRadius(Discky& discky , Coordinate& coor){
-    if(coor.type == COOR_PIX)return;
-
-    coor.x = (coor.norX * (discky.terminalInfo.x-1));
-    coor.y = (coor.norY * (discky.terminalInfo.y -1));
-}
-
 static objColor blendColor(const objColor& obj , const objColor& src , double alpha){
     alpha = std::max(0.0 , std::min(1.0 , alpha));
     objColor out;
@@ -104,7 +118,7 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     int ty = std::min(obj.vertex[0].y , obj.vertex[1].y);
     int bx = std::min(obj.vertex[0].x , obj.vertex[1].x);
     int by = std::max(obj.vertex[0].y , obj.vertex[1].y);
-    
+
     obj.minX = bx;
     obj.maxX = tx;
     obj.minY = ty;
@@ -142,7 +156,7 @@ static void renderRectangleObj(Discky& discky , objects& obj){
 static void renderCircleObj(Discky& discky , objects& obj){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
     normalizedToScreen(discky , obj.vertex[0]);
-    normalizedToScreenRadius(discky , obj.vertex[1]);
+    normalizedToScreen(discky , obj.vertex[1]);
 
     double rx = obj.vertex[1].x;
     double ry = obj.vertex[1].y;

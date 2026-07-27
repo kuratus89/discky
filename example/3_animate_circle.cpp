@@ -12,23 +12,43 @@ int main(){
     Discky discky;
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLUE);
-    discky.setAntiAliasing(antiAliasing::AA_HIGH);
-    double x = -0.5;
-    double y = 0.0;
+    // discky.setAntiAliasing(antiAliasing::AA_HIGH);
+    double ax = -0.5;
+    double ay = 0.0;
 
-    double r = 10;
-    double speedx = 0.08;
-    double speedy = 0.05;
+    double bx = 0.5;
+    double by = 0.0;
+
+    double aSpeedX = 0.05;
+    double aSpeedY = 0.02;
+
+    double bSpeedX = 0.05;
+    double bSpeedY = 0.02;
+
+    
 
     while(true){
-        objects& cir = discky.drawCircle(NOR_COORD(x , y) , NOR_COORD(0.2 , 0.2) , DISCKY_COLOR_GREEN);
+        objects& a = discky.drawCircle(NOR_COORD(ax, ay) , NOR_LEN_MONO(0.1) , DISCKY_COLOR_GREEN);
+        objects& b = discky.drawCircle(NOR_COORD(bx , by) , NOR_LEN_MONO(0.1) , DISCKY_COLOR_RED);
         discky.render();
-        discky.display();
-        if(cir.isTouchingBoundryX(discky))speedx = -speedx;
-        x+=speedx;
-        if(cir.isTouchingBoundryY(discky))speedy = -speedy;
-        y+=speedy;
+        
+        if(a.isTouchingBoundryX(discky))aSpeedX = -aSpeedX;
+        if(a.isTouchingBoundryY(discky))aSpeedY = -aSpeedY;
+        if(b.isTouchingBoundryX(discky))bSpeedX = -bSpeedX;
+        if(b.isTouchingBoundryY(discky))bSpeedY = -bSpeedY;
+
+        if(checkOverlap(a ,b)){
+            std::swap(aSpeedX , bSpeedX);
+            std::swap(aSpeedY , bSpeedY);
+        }
+        
+        ax+=aSpeedX;
+        ay+=aSpeedY;
+        bx+=bSpeedX;
+        by+=bSpeedY;
+        
         discky.refresh();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        discky.display();
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

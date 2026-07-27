@@ -5,13 +5,18 @@
 #include <functional>
 using ist = std::function<bool(double , double)>;
 static void normalizedToScreen(Discky& discky ,Coordinate& coor){
-    if((coor.type == COOR_PIX)||(coor.type == LEN_PIX)){
-        if((coor.x<0)||(coor.y<0))discky.callErrorHandle(ERRORS::INVALID_INPUT , "invalid coordinate");
-        return;
-    }
+    if(coor.type == COOR_PIX)return;
+    
 
     coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
     coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1))/ (double)2.0;
+}
+
+static void normalizedToScreenRadius(Discky& discky , Coordinate& coor){
+    if(coor.type == COOR_PIX)return;
+
+    coor.x = (coor.norX * (discky.terminalInfo.x-1));
+    coor.y = (coor.norY * (discky.terminalInfo.y -1));
 }
 
 static objColor blendColor(const objColor& obj , const objColor& src , double alpha){
@@ -30,10 +35,6 @@ static void blendPoint(Discky& discky , int x , int y , const objColor& color , 
         discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
         return;
     }
-    // if(alpha<=1.0){
-    //     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
-    //     return;
-    // }
     if(alpha<=0.0)return;
     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = blendColor(discky.frontBuffer.pixels[y*discky.terminalInfo.x + x], color , alpha);
 }
@@ -44,184 +45,6 @@ static void blendRange(Discky& discky , int a , int b, int y , const objColor& c
     b = std::min(b , discky.terminalInfo.x - 1);
     for(int i=a ; i<=b ; i++)blendPoint(discky , i , y , color , alpha);
 }
-
-// static void drawRange(Discky& discky , int a , int b , int y , objColor color){
-//     if((y<0)||(y>=discky.terminalInfo.y))return;
-//     a = std::max(a , 0);
-//     b = std::min(b , discky.terminalInfo.x-1);
-//     for(int i=a ;i<=b ; i++)discky.frontBuffer.pixels[y*discky.terminalInfo.x + i] = color;
-// }
-// static void drawPoint(Discky& discky , int x , int y , objColor color){
-//     discky.frontBuffer.pixels[y*discky.terminalInfo.x + x] = color;
-// }
-
-// static void fillFlatTriangle(Discky& discky , double& x1 , double& y1 , double& x2 , double& y2 , double& x3 , double& y3 ,const objColor& color){
-//     int sy = std::max(0 , (int)ceil(std::min(y1 , y2)));
-//     int ey = std::min(discky.terminalInfo.y -1 , (int)std::floor(std::max(y1 , y2)));
-//     if(y1==y2)return;
-
-//     double is1 = (x2 - x1)/(y2 - y1);
-//     double is2 = (x3 - x1)/(y3 - y1);
-
-//     for(int y = sy ; y<= ey ; y++){
-//         double t = y - y1;
-//         double xa = x1 + (is1*t);
-//         double xb = x1 + (is2*t);
-//         drawRange(discky , (int)std::round(std::min(xa , xb)) , (int)std::round(std::max(xa ,xb)) , y , color);
-//     }
-// }
-
-// static void renderRectangleHorizontalObj(Discky& discky , objects& obj){
-//     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL ,  "vertex underflow");
-//     Coordinate& a = obj.vertex[0];
-//     Coordinate& b = obj.vertex[1];
-//     normalizedToScreen(discky , a);
-//     normalizedToScreen(discky , b);
-
-//     int tx = std::max(a.x , b.x);
-//     int ty = std::min(a.y , b.y);
-//     int bx = std::min(a.x , b.x);
-//     int by = std::max(a.y , b.y);
-
-//     bx = std::max(bx , 0);
-//     by = std::min(by , discky.terminalInfo.y -1);
-//     tx = std::min(tx , discky.terminalInfo.x -1);
-//     ty = std::max(ty , 0);
-
-//     if((bx>tx)||(ty>by))return;
-
-//     for(int i=ty ; i<=by ; i++){
-//         // for(int j=bx ; j<=tx ; j++)discky.frontBuffer.pixels[i*discky.terminalInfo.x + j] = obj.color;
-//         drawRange(discky , bx , tx , i , obj.color);
-//     }
-// }
-
-// static void renderCircleObj(Discky& discky , objects& obj){
-//     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
-//     Coordinate& a = obj.vertex[0];
-//     Coordinate& rc = obj.vertex[1];
-//     normalizedToScreen(discky , a);
-//     if((rc.type !=LEN_PIX)||(rc.x<0))discky.callErrorHandle(ERRORS::INVALID_INPUT , "invalid radius");
-
-//     int x=0;
-//     int y= rc.x;
-//     int d = 1-rc.x;
-//     while(x<=y){
-//         drawRange(discky , a.x -x , a.x + x , a.y+y , obj.color);
-//         drawRange(discky , a.x -x , a.x + x , a.y -y , obj.color);
-//         drawRange(discky , a.x -y , a.x +y , a.y+ x , obj.color);
-//         drawRange(discky , a.x -y , a.x +y , a.y -x , obj.color);
-
-//         if(d<0){
-//             d+=(2*x) +3;
-//         }
-//         else {
-//             d+= 2*(x-y)+5;
-//             y--;
-//         }
-//         x++;
-//     }
-// }
-
-// static void renderLine(Discky& discky , objects& obj){
-//     Coordinate& a = obj.vertex[0];
-//     Coordinate& b = obj.vertex[1];
-//     normalizedToScreen(discky , a);
-//     normalizedToScreen(discky , b);
-//     int x1 = a.x;
-//     int y1 = a.y;
-//     int x2 = b.x;
-//     int y2 = b.y;
-//     int dx = abs(x2 - x1);
-//     int dy = abs(y2-y1);
-//     int err = dx - dy;
-//     int sx , sy;
-//     if(x1<x2)sx=1;
-//     else sx=-1;
-//     if(y1<y2)sy=1;
-//     else sy=-1;
-//     while(1){
-//         drawPoint(discky , x1 , y1 , obj.color);
-//         if((x1 ==x2)&&(y1==y2))break;
-//         int e2 = err*2;
-//         if(e2>-dy){
-//             err -= dy;
-//             x1+=sx;
-//         }
-//         if(e2<dx){
-//             err+=dx;
-//             y1+=sy;
-//         }        
-//     }
-// }
-
-// static void renderPoly(Discky& discky , objects& obj){
-//     int n = obj.vertex.size();
-//     if(n<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
-//     std::vector<double> cx(n) , cy(n);
-//     for(int i=0 ; i<n ; i++){
-//         normalizedToScreen(discky , obj.vertex[i]);
-//         cx[i] = obj.vertex[i].x;
-//         cy[i] = obj.vertex[i].y;
-//     }
-//     double fymin = cy[0] , fymax = cy[0];
-//     for(int i=1 ; i<n ; i++){
-//         fymin = std::min(fymin , cy[i]);
-//         fymax = std::max(fymax , cy[i]);
-//     }
-//     int sy = std::max(0 ,(int) std::ceil(fymin));
-//     int ey = std::min(discky.terminalInfo.y -1 , (int)std::floor(fymax));
-//     std::vector<double> sx(n);
-//     for(int y = sy ; y<=ey ; y++){
-//         int cnt=0;
-//         for(int i=0 ; i<n ; i++){
-//             int j = (i+1)%n;
-//             double y0 = cy[i];
-//             double y1 = cy[j];
-//             if(y0==y1)continue;
-//             if((y>=std::min(y0 , y1))&&(y<std::max(y0 , y1))){
-//                 sx[cnt] = cx[i] + ((y - y0)/(y1 - y0))*(cx[j]- cx[i]);
-//                 cnt++;
-//             }
-//         }
-//         if(cnt<2)continue;
-//         std::sort(sx.begin() , sx.begin()+cnt);
-//         for(int k=0 ; (k+1)<cnt ; k+=2)drawRange(discky , (int)std::round(sx[k]) , (int)std::round(sx[k+1]) , y , obj.color);
-//     }
-// }
-
-// static void renderTriangleObj(Discky& discky , objects& obj){
-//     if(obj.vertex.size()<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
-//     for(int i=0 ; i<3 ; i++)normalizedToScreen(discky , obj.vertex[i]);
-
-//     double x1 = obj.vertex[0].x;
-//     double x2 = obj.vertex[1].x;
-//     double x3 = obj.vertex[2].x;
-//     double y1 = obj.vertex[0].y;
-//     double y2 = obj.vertex[1].y;
-//     double y3 = obj.vertex[2].y;
-
-//     if(y1>y2){
-//         std::swap(x1 , x2);
-//         std::swap(y1 ,y2);
-//     }
-//     if(y2>y3){
-//         std::swap(x2 , x3);
-//         std::swap(y2 , y3);
-//     }
-//     if(y1>y2){
-//         std::swap(x1 , x2);
-//         std::swap(y1 , y2);
-//     }
-
-//     if(y2==y3)fillFlatTriangle(discky , x1 , y1 , x2 , y2 , x3 , y3 , obj.color);
-//     else if(y1==y2)fillFlatTriangle(discky , x3 , y3 , x1 , y1 ,x2 , y2 , obj.color);
-//     else {
-//         double xs = x1 + (((y2 - y1)/(y3 - y1)) *(x3 - x1));
-//         fillFlatTriangle(discky , x1 , y1 , x2 , y2 , xs , y2 , obj.color);
-//         fillFlatTriangle(discky , x3 , y3 , x2 , y2 , xs , y2 , obj.color);
-//     }
-// }
 
 static int aaSamples(const antiAliasing& mode){
     switch(mode){
@@ -281,11 +104,18 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     int ty = std::min(obj.vertex[0].y , obj.vertex[1].y);
     int bx = std::min(obj.vertex[0].x , obj.vertex[1].x);
     int by = std::max(obj.vertex[0].y , obj.vertex[1].y);
+    
+    obj.minX = bx;
+    obj.maxX = tx;
+    obj.minY = ty;
+    obj.maxY = by;
 
     bx = std::max(bx , 0);
     by = std::min(by , discky.terminalInfo.y - 1);
     tx = std::min(tx , discky.terminalInfo.x -1);
     ty = std::max(ty , 0);
+
+    
 
     if((bx>tx)||(ty>by))return;
     if(obj.boder>=1.0){
@@ -309,32 +139,41 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     }
 }
 
-
 static void renderCircleObj(Discky& discky , objects& obj){
-    if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "veretx underflow");
+    if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
     normalizedToScreen(discky , obj.vertex[0]);
+    normalizedToScreenRadius(discky , obj.vertex[1]);
 
-    double r = obj.vertex[1].x;
-    double ir;
-    if(obj.boder<1.0) ir = r*(1.0 - obj.boder);
-    else ir = 0.0;
+    double rx = obj.vertex[1].x;
+    double ry = obj.vertex[1].y;
+    double ir = 0.0;
+    if(obj.boder<1.0)ir = 1.0 - obj.boder;
+
     double cx = obj.vertex[0].x;
     double cy = obj.vertex[0].y;
 
-    ist tsi = [cx , cy , r , ir](double px , double py )->bool{
-        double dx = px - cx;
-        double dy = py - cy;
-        double d2 = dx*dx + dy*dy;
-        if(d2>r*r)return 0;
-        if((ir>0.0)&&(d2<ir*ir))return 0;
+    ist tsi = [cx , cy , rx , ry , ir](double px , double py)->bool{
+        if((rx<=0.0)||(ry<=0.0))return 0;
+        double dx = (px - cx)/rx;
+        double dy = (py - cy)/ry;
+        double d = (dx*dx) + (dy*dy);
+        if(d>1.0)return 0;
+        if(ir>0.0){
+            double idx = dx/ir;
+            double idy = dy/ir;
+            if(((idx*idx) + (idy*idy) )<1.0)return 0;
+        }
         return 1;
     };
-    int minX = (int)std::floor(cx - r);
-    int maxX = (int)std::ceil(cx+r);
-    int minY = (int)std::floor(cy - r);
-    int maxY = (int)std::ceil(cy+r);
-    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+    obj.minX = (int)std::floor(cx - rx);
+    obj.maxX = (int)std::ceil(cx + rx);
+    obj.minY = (int)std::floor(cy - ry);
+    obj.maxY = (int)std::ceil(cy + ry);
+
+    raster(discky , obj , obj.minX , obj.maxX , obj.minY , obj.maxY , tsi);
 }
+
+
 
 static void renderLine(Discky& discky , objects& obj){
     normalizedToScreen(discky , obj.vertex[0]);
@@ -363,6 +202,11 @@ static void renderLine(Discky& discky , objects& obj){
     int maxX = (int)std::ceil(std::max(x1 , x2)+1);
     int minY = (int)std::floor(std::min(y1 , y2)- 1);
     int maxY = (int)std::ceil(std::max(y1 , y2)+ 1);
+
+    obj.minX = minX;
+    obj.maxX = maxX;
+    obj.minY = minY;
+    obj.maxY = maxY;
 
     raster(discky , obj , minX , maxX , minY , maxY , tsi);
 }
@@ -413,6 +257,11 @@ static void renderTriangleObj(Discky& discky , objects& obj){
     int maxX = (int)std::ceil(std::max({x1 , x2 , x3}));
     int minY = (int)std::floor(std::min({y1 , y2 , y3}));
     int maxY = (int)std::ceil(std::max({y1 , y2 , y3}));
+
+    obj.minX = minX;
+    obj.maxX = maxX;
+    obj.minY = minY;
+    obj.maxY = maxY;
     raster(discky , obj , minX , maxX , minY , maxY , tsi);
 }
 
@@ -472,6 +321,11 @@ static void renderPoly(Discky& discky , objects obj){
     int maxX = (int)std::ceil(fxMax);
     int minY = (int)std::floor(fyMin);
     int maxY = (int)std::ceil(fyMax);
+
+    obj.minX = minX;
+    obj.maxX = maxX;
+    obj.minY = minY;
+    obj.maxY = maxY;
     raster(discky , obj , minX , maxX , minY , maxY , tsi);
 }
 

@@ -57,7 +57,13 @@ struct objects{
     bool removed=0;
     double boder=1;
     double opacity=1.0;
+    int minX;
+    int maxX;
+    int minY;
+    int maxY;
     void removeObj();
+    bool isTouchingBoundryX(const Discky& discky);
+    bool isTouchingBoundryY(const Discky& discky);
 };
 struct Screen{
     int x=0;

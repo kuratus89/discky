@@ -105,6 +105,16 @@ objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const 
     return recycleObjPush(*this , obj);
 }
 
+
+
+bool objects::isTouchingBoundryX(const Discky& discky){
+    if((minX<=0)||(maxX>=discky.terminalInfo.x))return 1;
+    return 0;
+}
+bool objects::isTouchingBoundryY(const Discky& discky){
+    if((minY<=0)||(maxY>=discky.terminalInfo.y))return 1;
+    return 0;
+}
 void Discky::setAntiAliasing(const antiAliasing& mode){
     aaMode = mode;
 }
@@ -128,3 +138,4 @@ void Discky::refresh(){
 void objects::removeObj(){
     removed=1;
 }
+

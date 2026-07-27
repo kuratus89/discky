@@ -21,17 +21,14 @@ int main(){
     double speedy = 0.05;
 
     while(true){
-        discky.drawCircle(NOR_COORD(x , y) , r , DISCKY_COLOR_GREEN);
+        objects& cir = discky.drawCircle(NOR_COORD(x , y) , NOR_COORD(0.2 , 0.2) , DISCKY_COLOR_GREEN);
         discky.render();
         discky.display();
+        if(cir.isTouchingBoundryX(discky))speedx = -speedx;
+        x+=speedx;
+        if(cir.isTouchingBoundryY(discky))speedy = -speedy;
+        y+=speedy;
         discky.refresh();
-
-        double rx = r/((discky.getTerminalSizeX() -1)/2.0);
-        double ry = r/((discky.getTerminalSizeY() -1)/2.0);
-        if((x+speedx+rx>1.0)||(x+speedx-rx<-1.0))speedx = -speedx;
-        else x+=speedx;
-        if((y+speedy+ry>1.0)||(y+ speedy -ry<-1.0))speedy = -speedy;
-        else y+=speedy;
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

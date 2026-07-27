@@ -20,15 +20,15 @@ int main(){
     double speedy = 0.05;
 
     while(true){
-        discky.drawRectangle(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
+        objects& rect = discky.drawRectangle(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
         discky.render();
         discky.display();
-        discky.refresh();
         
-        if((x+size+speedx>1.0)||(x-size+ speedx<-1.0))speedx = -speedx;
-        else x+=speedx;
-        if((y+ size+speedy>1.0)||(y - size + speedy < -1.0))speedy = - speedy;
-        else y+=speedy;
+        if(rect.isTouchingBoundryX(discky))speedx = -speedx;
+        if(rect.isTouchingBoundryY(discky))speedy = - speedy;
+        x+=speedx;
+        y+=speedy;
+        discky.refresh();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

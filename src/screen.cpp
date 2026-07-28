@@ -37,6 +37,7 @@ void Discky::display(){
     int sy=0;
     
     std::string out;
+    std::string texts;
     out.reserve(static_cast<size_t> (terminalInfo.x)* terminalInfo.y * 20);
     moveCursor(out , 0 ,0);
 
@@ -106,8 +107,21 @@ void Discky::display(){
             }
         }
     }
+    for(auto& txt:rawTxts){
+        if((x!=txt.vertex.x)||(y!=txt.vertex.y)){
+            moveCursor(texts , txt.vertex.x , txt.vertex.y);
+            x = txt.vertex.x;
+            y = txt.vertex.y;
+        }
+        if(!compareObjColor(txtColor , txt.color)){
+            colorText(texts , txt.color);
+            txtColor = txt.color;
+        }
+        texts+=txt.txt;
+    }
 
     std::cout<<out;
+    std::cout<<texts;
     std::cout.flush();
     std::swap(backBuffer , frontBuffer);
 }

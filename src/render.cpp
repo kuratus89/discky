@@ -361,6 +361,11 @@ void renderNewBg(Discky& discky , int x , int y , Screen& screen){
     screen.pixels.assign(static_cast<size_t>(x)*y , discky.bgColor);
 }
 
+void renderTxt(Discky& discky , rawText& txt){
+    normalizedToScreen(discky , txt.vertex);
+}
+
+
 void Discky::render(){
     TerminalInfo Info = getTerminalInfo();
     
@@ -377,4 +382,6 @@ void Discky::render(){
     }
 
     for(auto& obj:objs)renderObj(*this , obj);
+    for(auto& txt:rawTxts)renderTxt(*this , txt);
+
 }

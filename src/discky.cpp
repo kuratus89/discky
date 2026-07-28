@@ -17,6 +17,10 @@ void iniTerminal(){
     std::cout.flush();
 }
 
+void endDiscky(){
+    std::cout<<"\033[?25h\033[0m";
+}
+
 Discky::Discky(){
     terminalInfo.sysName = OperatingSystem::INVALID;
     terminalInfo.x = -1;
@@ -27,6 +31,7 @@ Discky::Discky(){
 
 void Discky::callErrorHandle(const ERRORS error ,  const std::string& msg)const{
     if(handleErrors)handleErrors(error , msg);
+    endDiscky();
     std::exit(0);
 }
 
@@ -134,6 +139,7 @@ int Discky::getTerminalSizeY(){
 
 void Discky::refresh(){
     objs.clear();
+    rawTxts.clear();
 }
 
 void objects::removeObj(){
@@ -301,4 +307,23 @@ bool checkOverlap(const objects& a ,const objects& b){
     if((pa.empty())||(pb.empty()))return 0;
 
     return satOverlap(pa , pb);
+}
+
+rawText& Discky::drawRawTxt(const Coordinate& a , const std::string& txt , const objColor& color){
+    rawText text;
+    text.color = color;
+    text.txt =txt;
+    text.vertex = a;
+    rawTxts.push_back(text);
+    return rawTxts.back();
+}
+
+bool rawText::isTouchingBoundryX(const Discky& discky){
+    if((vertex.x<=0)||(vertex.x+txt.size()+2>=discky.terminalInfo.x))return 1;
+    return 0;
+}
+
+bool rawText::isTouchingBoundryY(const Discky& discky){
+    if((vertex.y<0)||(vertex.y+1>=(discky.terminalInfo.y/2)))return 1;
+    return 0;
 }

@@ -67,6 +67,15 @@ struct objects{
     bool isTouchingBoundryX(const Discky& discky);
     bool isTouchingBoundryY(const Discky& discky);
 };
+
+struct rawText{
+    std::string txt;
+    Coordinate vertex;
+    objColor color ;
+    bool isTouchingBoundryX(const Discky& discky);
+    bool isTouchingBoundryY(const Discky& discky);
+
+};
 struct Screen{
     int x=0;
     int y=0;
@@ -76,6 +85,7 @@ class Discky{
     public:
         TerminalInfo terminalInfo;
         std::vector<objects> objs;
+        std::vector<rawText> rawTxts;
         Screen backBuffer;
         Screen frontBuffer;
         objColor bgColor;
@@ -91,6 +101,7 @@ class Discky{
         objects& drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
         objects& drawLine(const Coordinate& a , const Coordinate& b, const objColor& color , const double& opacity= 1.0);
         objects& drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& boder =1.0 , const double& opacity = 1.0);
+        rawText& drawRawTxt(const Coordinate& a ,const std::string& txt , const objColor& color);
         void removeObj(objects& obj);
         void render();
         void display();
@@ -103,5 +114,7 @@ class Discky{
 };
 bool checkOverlap(const objects& a, const objects& b);
 void iniTerminal();
+void endDiscky();
+
 #include "colors.h"
 #include "render.h"

@@ -108,6 +108,7 @@ void Discky::display(){
         }
     }
     for(auto& txt:rawTxts){
+        if((txt.vertex.y<0)||(txt.vertex.y>=(terminalInfo.y/2)))continue;
         if((x!=txt.vertex.x)||(y!=txt.vertex.y)){
             moveCursor(texts , txt.vertex.x , txt.vertex.y);
             x = txt.vertex.x;
@@ -117,7 +118,11 @@ void Discky::display(){
             colorText(texts , txt.color);
             txtColor = txt.color;
         }
-        texts+=txt.txt;
+        for(auto& val:txt.txt){
+            if((x<0)||(x>=terminalInfo.x))continue;
+            texts.push_back(val);
+            x++;
+        }
     }
 
     std::cout<<out;

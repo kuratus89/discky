@@ -20,12 +20,12 @@ int main(){
     double speedy = 0.05;
 
     while(true){
-        objects& rect = discky.drawRectangle(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
+        objId rect = discky.drawRectangle(NOR_COORD(x - size , y- size) , NOR_COORD(x+size , y+size) , DISCKY_COLOR_GREEN);
         discky.render();
         discky.display();
         
-        if(rect.isTouchingBoundryX(discky))speedx = -speedx;
-        if(rect.isTouchingBoundryY(discky))speedy = - speedy;
+        if(discky.isObjectTouchingBoundryX(rect))speedx = -speedx;
+        if(discky.isObjectTouchingBoundryY(rect))speedy = - speedy;
         x+=speedx;
         y+=speedy;
         discky.refresh();

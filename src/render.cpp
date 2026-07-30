@@ -4,6 +4,52 @@
 #include <cmath>
 #include <functional>
 using ist = std::function<bool(double , double)>;
+struct pxf{
+    double px , py;
+    double fx , fy;
+};
+
+struct clipReact{
+    int minX=0;
+    int maxX =0;
+    int minY=0;
+    int maxY =0;
+    bool active =0;
+    ist shapeTest = nullptr;
+};
+static clipReact intersectRect(const clipReact& a , int minX , int maxX , int minY , int maxY){
+    clipReact r;
+    r.active =1;
+    if(a.active){
+        r.minX = std::max(a.minX , minX);
+        r.maxX = std::min(a.maxX , maxX);
+        r.minY = std::max(a.minY , minY);
+        r.maxY = std::min(a.maxY , maxY);
+    }
+    else{
+        r.minX = minX;
+        r.minY = minY;
+        r.maxX = maxX;
+        r.maxY = maxY;
+    }
+    return r;
+}
+
+static void normalizedToParentLength(Coordinate& coor , const pxf& p){
+    if(coor.type == LEN_PIX){
+        if(coor.y==-1)coor.y = coor.x;
+        return;
+    }
+    if(coor.norY==-1){
+        double m = std::min(p.fx , p.fy);
+        coor.x = coor.y = (int)std::lround(coor.norX*m);
+        return;
+    }
+    coor.x = (int)std::lround(coor.norX* p.fx);
+    coor.y = (int)std::lround(coor.norY * p.fy);
+
+}
+
 
 
 static void normalizedToScreenLength(Discky& discky , Coordinate& coor){
@@ -33,13 +79,30 @@ static void normalizedToScreen(Discky& discky ,Coordinate& coor){
     coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
     coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1))/ (double)2.0;
 }
+static void toScreen(Discky& discky , Coordinate& coor , const pxf* p){
+    if(p==nullptr){
+        normalizedToScreen(discky, coor);
+        return;
+    }
+    if(coor.type ==COOR_PIX){
+        coor.x = (int)std::lround(p->px + coor.x);
+        coor.y = (int)std::lround(p->py + coor.y);
+        return;
+    }
+    if((coor.type ==LEN_NOR)||(coor.type==LEN_PIX)){
+        normalizedToParentLength(coor , *p);
+        return;
+    }
+    coor.x = (int)std::lround(p->px + (coor.norX * p->fx));
+    coor.y = (int)std::lround(p->py + (coor.norY * p->fy));
+}
 static objColor blendColor(const objColor& obj , const objColor& src , double alpha){
     alpha = std::max(0.0 , std::min(1.0 , alpha));
     objColor out;
     out.r = (int)std::lround(src.r*alpha + obj.r*(1.0 - alpha));
     out.g = (int)std::lround(src.g*alpha + obj.g*(1.0 - alpha));
     out.b = (int)std::lround(src.b*alpha + obj.b*(1.0 - alpha));
-    out.o = 255;
+    // out.o = 255;
     return out;
 }
 
@@ -83,36 +146,44 @@ static double sampleCoverage(const ist& tsi , int x , int y , int n){
     return (double)hit/(double)(n*n);
 }
 
-static void raster(Discky& discky , const objects& obj , int minX , int maxX, int minY , int maxY , const ist& tsi){
+static void raster(Discky& discky , const objects& obj , int minX , int maxX, int minY , int maxY , const ist& tsi , const clipReact* clip){
     int n = aaSamples(discky.aaMode);
     minX = std::max(minX , 0);
     maxX = std::min(maxX , discky.terminalInfo.x - 1);
     minY = std::max(0 , minY);
     maxY = std::min(maxY , discky.terminalInfo.y -1);
 
+    if(clip){
+        minX = std::max(minX , clip->minX);
+        maxX = std::min(maxX , clip->maxX);
+        minY = std::max(minY , clip->minY);
+        maxY = std::min(maxY ,clip->maxY);
+    }
+
+    ist eff = tsi;
+    if((clip)&&(clip->shapeTest)){
+        ist clipShape = clip->shapeTest;
+        eff = [tsi , clipShape](double px , double py)->bool{
+            return ((tsi(px , py))&& clipShape(px , py));
+        };
+    }
+
     for(int y= minY ; y<=maxY ; y++){
         for(int x = minX ; x<=maxX ; x++){
             if(n<=1){
-                if(tsi(x+0.5 , y+0.5))blendPoint(discky , x , y , obj.color , obj.opacity);
+                if(eff(x+0.5 , y+0.5))blendPoint(discky , x , y , obj.color , obj.opacity);
                 continue;
             }
-            bool cx1 = tsi(x , y);
-            bool cy1 = tsi(x+1 , y);
-            bool cx2 = tsi(x , y+1);
-            bool cy2 = tsi(x+1 , y+1);
-            if((!cx1)&&(!cy1)&&(!cx2)&&(!cy2))continue;
-            else {
-                double cov = sampleCoverage(tsi, x , y , n);
-                if(cov>0.0)blendPoint(discky , x , y , obj.color , obj.opacity*cov);
-            }
+            double cov = sampleCoverage(eff, x , y , n);
+            if(cov > 0.0) blendPoint(discky , x , y , obj.color , obj.opacity*cov);
         }
     }
 }
 
-static void renderRectangleObj(Discky& discky , objects& obj){
+static void renderRectangleObj(Discky& discky , objects& obj , const pxf* parent, const clipReact* clip){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL ,"vertex underflow");
-    normalizedToScreen(discky , obj.vertex[0]);
-    normalizedToScreen(discky , obj.vertex[1]);
+    toScreen(discky , obj.vertex[0] ,parent );
+    toScreen(discky , obj.vertex[1] , parent);
 
     int tx = std::max(obj.vertex[0].x , obj.vertex[1].x);
     int ty = std::min(obj.vertex[0].y , obj.vertex[1].y);
@@ -129,9 +200,35 @@ static void renderRectangleObj(Discky& discky , objects& obj){
     tx = std::min(tx , discky.terminalInfo.x -1);
     ty = std::max(ty , 0);
 
+    if(clip){
+        bx = std::max(bx , clip->minX);
+        tx = std::min(tx , clip->maxX);
+        ty = std::max(ty , clip->minY);
+        by = std::min(by , clip->maxY);
+
+    }
+
     
 
     if((bx>tx)||(ty>by))return;
+
+    const ist* clipShape;
+    if((clip)&&(clip->shapeTest))clipShape = &clip->shapeTest;
+    else clipShape = nullptr;
+
+    auto fr = [&](int a , int b , int y){
+        if(!clipShape){
+            blendRange(discky , a , b , y , obj.color , obj.opacity);
+            return;            
+        }
+        if((y<0)||(y>=discky.terminalInfo.y))return;
+        a = std::max(a , 0);
+        b = std::min(b , discky.terminalInfo.x - 1);
+        for(int i=a ; i<=b ; i++){
+            if((*clipShape)(i+0.5 , y+0.5))blendPoint(discky , i , y , obj.color , obj.opacity );
+        }
+    };
+
     if(obj.boder>=1.0){
         for(int i=ty ; i<=by ; i++)blendRange(discky , bx , tx , i , obj.color , obj.opacity);
         return;
@@ -144,19 +241,19 @@ static void renderRectangleObj(Discky& discky , objects& obj){
 
     for(int i=ty ; i<=by ; i++){
         if((i<ty+hy)||(i>by - hy)){
-            blendRange(discky , bx , tx , i , obj.color , obj.opacity);
+            fr(bx , tx , i);
         }
         else {
-            blendRange(discky , bx , bx+hx- 1 , i , obj.color , obj.opacity);
-            blendRange(discky , tx - hx+1 , tx , i , obj.color , obj.opacity);
+            fr(bx , bx+hx -1 , i);
+            fr(tx - hx+1 , tx , i);
         }
     }
 }
 
-static void renderCircleObj(Discky& discky , objects& obj){
+static void renderCircleObj(Discky& discky , objects& obj , const pxf* parent , const clipReact* clip){
     if(obj.vertex.size()<2)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
-    normalizedToScreen(discky , obj.vertex[0]);
-    normalizedToScreen(discky , obj.vertex[1]);
+    toScreen(discky , obj.vertex[0] , parent);
+    toScreen(discky , obj.vertex[1],  parent);
 
     double rx = obj.vertex[1].x;
     double ry = obj.vertex[1].y;
@@ -184,14 +281,15 @@ static void renderCircleObj(Discky& discky , objects& obj){
     obj.minY = (int)std::floor(cy - ry);
     obj.maxY = (int)std::ceil(cy + ry);
 
-    raster(discky , obj , obj.minX , obj.maxX , obj.minY , obj.maxY , tsi);
+    raster(discky , obj , obj.minX , obj.maxX , obj.minY , obj.maxY , tsi , clip);
 }
 
 
 
-static void renderLine(Discky& discky , objects& obj){
-    normalizedToScreen(discky , obj.vertex[0]);
-    normalizedToScreen(discky , obj.vertex[1]);
+
+static void renderLine(Discky& discky , objects& obj ,  const pxf* parent , const clipReact* clip){
+    toScreen(discky , obj.vertex[0] , parent);
+    toScreen(discky , obj.vertex[1] , parent);
 
     double x1 = obj.vertex[0].x;
     double y1 = obj.vertex[0].y;
@@ -222,7 +320,7 @@ static void renderLine(Discky& discky , objects& obj){
     obj.minY = minY;
     obj.maxY = maxY;
 
-    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+    raster(discky , obj , minX , maxX , minY , maxY , tsi , clip);
 }
 
 static double triSign(double x1 , double y1 , double x2 , double y2 , double x3 , double y3){
@@ -238,9 +336,9 @@ static bool pointInTriangle(double px , double py , double ax , double ay , doub
     return (!(hasNeg && hasPos));
 }
 
-static void renderTriangleObj(Discky& discky , objects& obj){
+static void renderTriangleObj(Discky& discky , objects& obj , const pxf* parent , const clipReact* clip){
     if(obj.vertex.size()<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
-    for(int i=0 ; i<3 ; i++)normalizedToScreen(discky , obj.vertex[i]);
+    for(int i=0 ; i<3 ; i++)toScreen(discky , obj.vertex[i] , parent);
 
     double x1 = obj.vertex[0].x;
     double x2 = obj.vertex[1].x;
@@ -276,7 +374,7 @@ static void renderTriangleObj(Discky& discky , objects& obj){
     obj.maxX = maxX;
     obj.minY = minY;
     obj.maxY = maxY;
-    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+    raster(discky , obj , minX , maxX , minY , maxY , tsi , clip);
 }
 
 static bool pointInPoly(double px , double py , const std::vector<double>& vx , const std::vector<double>& vy){
@@ -291,12 +389,12 @@ static bool pointInPoly(double px , double py , const std::vector<double>& vx , 
     return ins;
 }
 
-static void renderPoly(Discky& discky , objects obj){
+static void renderPoly(Discky& discky , objects obj , const pxf* parent , const clipReact* clip){
     int n = obj.vertex.size();
     if(n<3)discky.callErrorHandle(ERRORS::INTERNAL , "vertex underflow");
     std::vector<double> cx(n) , cy(n);
     for(int i=0 ; i<n ; i++){
-        normalizedToScreen(discky , obj.vertex[i]);
+        toScreen(discky , obj.vertex[i] , parent);
         cx[i] = obj.vertex[i].x;
         cy[i] = obj.vertex[i].y;
     }
@@ -340,18 +438,104 @@ static void renderPoly(Discky& discky , objects obj){
     obj.maxX = maxX;
     obj.minY = minY;
     obj.maxY = maxY;
-    raster(discky , obj , minX , maxX , minY , maxY , tsi);
+    raster(discky , obj , minX , maxX , minY , maxY , tsi , clip);
 }
 
-static void renderObj(Discky& discky , objects& obj){
+static ist buildObjShapeTest(const objects& obj){
+    switch(obj.type){
+        case (objType::CIRCLE):{
+            double cx = obj.vertex[0].x;
+            double cy = obj.vertex[0].y;
+            double rx = obj.vertex[1].x;
+            double ry = obj.vertex[1].y;
+            double ir = 0.0;
+            if(obj.boder<1.0)ir = 1.0 - obj.boder;
+            return [cx , cy , rx , ry , ir](double px , double py)->bool{
+                if((rx<=0.0)||(ry<=0.0))return 0;
+                double dx = (px - cx)/rx;
+                double dy = (py - cy)/ry;
+                double d = (dx*dx)+(dy*dy);
+                if(d>1.0)return 0;
+                if(ir>0.0){
+                    double idx = dx/ir;
+                    double idy = dy/ir;
+                    if(((idx*idx)+(idy*idy))<1.0)return 0;
+                }
+                return 1;
+            };
+        }
+        case (objType::TRIANGLE):{
+            double x1 = obj.vertex[0].x;
+            double x2 = obj.vertex[1].x;
+            double x3 = obj.vertex[2].x;
+            double y1 = obj.vertex[0].y;
+            double y2 = obj.vertex[1].y;
+            double y3 = obj.vertex[2].y;
+            return [x1 , y1 , x2 , y2 , x3 , y3](double px , double py)->bool{
+                return pointInTriangle(px , py , x1 , y1 , x2 , y2 , x3 , y3);
+            };
+        }
+        case (objType::POLY):{
+            std::vector<double> vx , vy;
+            vx.reserve(obj.vertex.size());
+            vy.reserve(obj.vertex.size());
+            for(const auto& v:obj.vertex){
+                vx.push_back(v.x);
+                vy.push_back(v.y);
+            }
+            return [vx , vy](double px , double py)->bool{
+                return pointInPoly(px , py , vx , vy);
+            };
+        }
+
+        default:return nullptr;
+    }
+}
+
+static void renderObj(Discky& discky , objects& obj , const pxf* parent , const clipReact* clip){
     if(obj.removed)return;
     switch(obj.type){
-        case (objType::RECTANGLE):renderRectangleObj(discky , obj);break;
-        case (objType::CIRCLE):renderCircleObj(discky , obj);break;
-        case (objType::LINE):renderLine(discky , obj);break;
-        case (objType::POLY):renderPoly(discky , obj);break;
-        case (objType::TRIANGLE):renderTriangleObj(discky , obj); break;
+        case (objType::RECTANGLE):renderRectangleObj(discky , obj , parent , clip);break;
+        case (objType::CIRCLE):renderCircleObj(discky , obj , parent , clip);break;
+        case (objType::LINE):renderLine(discky , obj ,parent , clip );break;
+        case (objType::POLY):renderPoly(discky , obj , parent , clip);break;
+        case (objType::TRIANGLE):renderTriangleObj(discky , obj , parent , clip); break;
         default: break;
+    }
+
+    if(obj.children.empty())return;
+
+    pxf cxf{
+        (obj.minX + obj.maxX)/2.0,
+        (obj.minY + obj.maxY)/2.0,
+        std::max(0.5 , (obj.maxX - obj.minX)/2.0),
+        std::max(0.5 , (obj.maxY - obj.minY)/2.0)
+    };
+    clipReact cp ;
+    if(clip)cp = *clip;
+    else cp = clipReact();
+
+    if(obj.clipChildren){
+        cp = intersectRect(clip ? *clip : clipReact{} , obj.minX , obj.maxX , obj.minY , obj.maxY);
+
+        ist ownShape = buildObjShapeTest(obj);
+        if(ownShape){
+            if(clip && clip->shapeTest){
+                ist inherited = clip->shapeTest;
+                cp.shapeTest = [inherited , ownShape](double px , double py)->bool{
+                    return inherited(px , py) && ownShape(px , py);   // calls ownShape(px,py), not just `ownShape`
+                };
+            }
+            else {
+                cp.shapeTest = ownShape;
+            }
+        }
+    }
+
+    for(objId id:obj.children){
+        if(id>=discky.objs.size())continue;
+        if(cp.active)renderObj(discky , discky.objs[id] , &cxf , &cp);
+        else renderObj(discky , discky.objs[id] , &cxf , nullptr);
     }
 }
 
@@ -381,7 +565,10 @@ void Discky::render(){
         std::fill(frontBuffer.pixels.begin() , frontBuffer.pixels.end() , bgColor);
     }
 
-    for(auto& obj:objs)renderObj(*this , obj);
+    for(auto& obj:objs){
+        if(obj.parent != NO_PARENT)continue;
+        renderObj(*this , obj, nullptr , nullptr);
+    }
     for(auto& txt:rawTxts)renderTxt(*this , txt);
 
 }

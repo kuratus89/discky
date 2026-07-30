@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -43,18 +44,18 @@ void Discky::setBackground(const objColor&  color){
     bgColor = color;
 }
 
-static objects& recycleObjPush(Discky& discky ,objects& obj){
+static objId recycleObjPush(Discky& discky ,objects& obj){
     if(discky.objRecycleBin.size()>0){
         int it = discky.objRecycleBin.back();
         discky.objRecycleBin.pop_back();
         discky.objs[it] = obj;
-        return discky.objs[it];
+        return  it;
     }
     discky.objs.push_back(obj);
-    return discky.objs.back();
+    return( discky.objs.size()-1);
 }
 
-objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const objColor& color , const double& boder , const double& opacity){
+objId Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const objColor& color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
@@ -66,7 +67,7 @@ objects& Discky::drawRectangle(const Coordinate& a , const Coordinate& b ,const 
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder , const double& opacity){
+objId Discky::drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
@@ -78,7 +79,7 @@ objects& Discky::drawCircle(const Coordinate& a , const Coordinate& b , const ob
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objColor& color , const double& opacity){
+objId Discky::drawLine(const Coordinate& a, const Coordinate& b , const objColor& color , const double& opacity){
     objects obj;
     obj.vertex.reserve(2);
     obj.color = color;
@@ -89,7 +90,7 @@ objects& Discky::drawLine(const Coordinate& a, const Coordinate& b , const objCo
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &color , const double& boder , const double& opacity){
+objId Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &color , const double& boder , const double& opacity){
     objects obj;
     if(ver.size()==0)callErrorHandle(ERRORS::INVALID_INPUT , "invalid numbers of vertex for poly");
     obj.vertex.resize(ver.size());
@@ -101,7 +102,7 @@ objects& Discky::drawPoly(const std::vector<Coordinate> &ver , const objColor &c
     return recycleObjPush(*this , obj);
 }
 
-objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor & color , const double& boder , const double& opacity){
+objId Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor & color , const double& boder , const double& opacity){
     objects obj;
     obj.vertex = {a , b , c};
     obj.color = color;
@@ -112,22 +113,53 @@ objects& Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const 
 }
 
 
+bool Discky::isObjectTouchingBoundryX(objId obj){
+    if((obj<0)||(obj>=objs.size()))return 0;
+    if((objs[obj].minX<=0)||(objs[obj].maxX>=terminalInfo.x))return 1;
+    return 0;
+}
 
-bool objects::isTouchingBoundryX(const Discky& discky){
-    if((minX<=0)||(maxX>=discky.terminalInfo.x))return 1;
+bool Discky::isObjectTouchingBoundryY(objId obj){
+    if((obj<0)||(obj>=objs.size()))return 0;
+    if((objs[obj].minY<=0)||(objs[obj].maxY>=terminalInfo.y))return 1;
     return 0;
 }
-bool objects::isTouchingBoundryY(const Discky& discky){
-    if((minY<=0)||(maxY>=discky.terminalInfo.y))return 1;
-    return 0;
-}
+
 void Discky::setAntiAliasing(const antiAliasing& mode){
     aaMode = mode;
 }
 
 void Discky::removeObj(objects& obj){
-    obj.removed=1;
-    objRecycleBin.push_back(&obj - objs.data());
+    objId id = (objId)(&obj - objs.data());
+
+    if((obj.parent != NO_PARENT)&&(obj.parent<objs.size())){
+        auto& si = objs[obj.parent].children;
+        si.erase(std::remove(si.begin() , si.end() , id));
+
+    }
+    for(objId c:obj.children)if(c<objs.size())objs[c].parent = NO_PARENT;
+    obj.children.clear();
+
+    obj.removed =1;
+    objRecycleBin.push_back(id);
+}
+
+void Discky::addChild(objId parent , objId child){
+    if((parent>=objs.size())||(child>=objs.size())){
+        callErrorHandle(ERRORS::INVALID_INPUT , "addChild : invalid parent/child id");
+    }
+    if(parent ==child)callErrorHandle(ERRORS::INVALID_INPUT , "addChild : object cannot be its own parent");
+    objId wk = parent;
+    while(wk !=NO_PARENT){
+        if(wk == child)callErrorHandle(ERRORS::INVALID_INPUT , "addChild : a child cannot be its own ancestor");
+        wk = objs[wk].parent;
+    }
+    if(objs[child].parent !=NO_PARENT){
+        auto si = objs[objs[child].parent].children;
+        si.erase(std::remove(si.begin() , si.end() , child) , si.end());
+    }
+    objs[child].parent = parent;
+    objs[parent].children.push_back(child);
 }
 int Discky::getTerminalSizeX(){
     return terminalInfo.x;
@@ -294,7 +326,10 @@ bool circlePolyOverlap(const objects& circle , const objects& poly){
     return 0;
 }
 
-bool checkOverlap(const objects& a ,const objects& b){
+bool Discky::checkOverlap(const objId ia ,const objId ib){
+    if((ia<0)||(ib<0)||(ia>=objs.size())||(ib>=objs.size()))return 0;
+    objects& a  = objs[ia];
+    objects& b = objs[ib];
     
     bool ac = (a.type ==objType::CIRCLE);
     bool bc = (b.type == objType::CIRCLE);
@@ -309,21 +344,23 @@ bool checkOverlap(const objects& a ,const objects& b){
     return satOverlap(pa , pb);
 }
 
-rawText& Discky::drawRawTxt(const Coordinate& a , const std::string& txt , const objColor& color){
+objId Discky::drawRawTxt(const Coordinate& a , const std::string& txt , const objColor& color){
     rawText text;
     text.color = color;
     text.txt =txt;
     text.vertex = a;
     rawTxts.push_back(text);
-    return rawTxts.back();
+    return (rawTxts.size()-1);
 }
 
-bool rawText::isTouchingBoundryX(const Discky& discky){
-    if((vertex.x<=0)||(vertex.x+txt.size()+2>=discky.terminalInfo.x))return 1;
+bool Discky::isTxtTouchingBoundryX(objId txt){
+    if((txt<0)||(txt>=rawTxts.size()))return 0;
+    if((rawTxts[txt].vertex.x <=0)||(rawTxts[txt].vertex.x+ rawTxts[txt].txt.size()>=terminalInfo.x ))return 1;
     return 0;
 }
 
-bool rawText::isTouchingBoundryY(const Discky& discky){
-    if((vertex.y<0)||(vertex.y+1>=(discky.terminalInfo.y/2)))return 1;
+bool Discky::isTxtTouchingBoundryY(objId txt){
+    if((txt<0)||(txt>=rawTxts.size()))return 0;
+    if((rawTxts[txt].vertex.y <=0)||(rawTxts[txt].vertex.y >= (terminalInfo.y/2)))return 1;
     return 0;
 }

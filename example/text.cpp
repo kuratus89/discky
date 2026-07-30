@@ -16,10 +16,10 @@ int main(){
     double spx = 0.05;
     double spy = 0.05;
     while(true){
-        rawText& txt = discky.drawRawTxt(NOR_COORD(pox , poy) , "HELLO WORLD" , DISCKY_COLOR_RED);
+        objId txt = discky.drawRawTxt(NOR_COORD(pox , poy) , "HELLO WORLD" , DISCKY_COLOR_RED);
         discky.render();
-        if(txt.isTouchingBoundryX(discky))spx = -spx;
-        if(txt.isTouchingBoundryY(discky))spy = -spy;
+        if(discky.isTxtTouchingBoundryX(txt))spx = -spx;
+        if(discky.isTxtTouchingBoundryY(txt))spy = -spy;
         pox+=spx;
         poy+=spy;
         discky.display();

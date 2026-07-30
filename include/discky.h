@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 #include <functional>
+
+using objId = size_t;
+inline constexpr objId NO_PARENT = (objId)-1;
+
 enum class objType{
     TRIANGLE,
     RECTANGLE,
@@ -46,12 +50,15 @@ inline Coordinate SCR_LEN_MONO(int x){return Coordinate{unitType::LEN_PIX , x , 
 inline Coordinate NOR_LEN_MONO(double x){return Coordinate{unitType::LEN_NOR , -1 , -1 , x , -1};}
 inline Coordinate SCR_LEN_DI(int a , int b){return Coordinate{unitType::LEN_PIX , a , b , -1 , -1};}
 inline Coordinate NOR_LEN_DI(double a , double b){return Coordinate{unitType::LEN_NOR , -1 , -1 , a , b};}
+
 struct objColor{
     int r;
     int g;
     int b;
-    int o;
 };
+
+inline objColor DISCKY_COLOR_RGB(int r , int g , int b){return objColor{r , g , b};}
+
 struct objects{
     std::vector<Coordinate> vertex;
     objType type;
@@ -64,17 +71,16 @@ struct objects{
     int minY;
     int maxY;
     void removeObj();
-    bool isTouchingBoundryX(const Discky& discky);
-    bool isTouchingBoundryY(const Discky& discky);
+    objId parent = NO_PARENT;
+    std::vector<objId> children;
+    bool clipChildren = 1;
+
 };
 
 struct rawText{
     std::string txt;
     Coordinate vertex;
     objColor color ;
-    bool isTouchingBoundryX(const Discky& discky);
-    bool isTouchingBoundryY(const Discky& discky);
-
 };
 struct Screen{
     int x=0;
@@ -96,12 +102,12 @@ class Discky{
         void callErrorHandle(ERRORS error , const std::string& msg) const;
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
-        objects& drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color , const double& boder =1.0 , const double& opacity =1.0);
-        objects& drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
-        objects& drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
-        objects& drawLine(const Coordinate& a , const Coordinate& b, const objColor& color , const double& opacity= 1.0);
-        objects& drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& boder =1.0 , const double& opacity = 1.0);
-        rawText& drawRawTxt(const Coordinate& a ,const std::string& txt , const objColor& color);
+        objId drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color , const double& boder =1.0 , const double& opacity =1.0);
+        objId drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
+        objId drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
+        objId drawLine(const Coordinate& a , const Coordinate& b, const objColor& color , const double& opacity= 1.0);
+        objId drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& boder =1.0 , const double& opacity = 1.0);
+        objId drawRawTxt(const Coordinate& a ,const std::string& txt , const objColor& color);
         void removeObj(objects& obj);
         void render();
         void display();
@@ -109,10 +115,15 @@ class Discky{
         int getTerminalSizeX();
         int getTerminalSizeY();
         void setAntiAliasing(const antiAliasing& mode);
+        bool isObjectTouchingBoundryX(objId obj);
+        bool isObjectTouchingBoundryY(objId obj);
+        bool isTxtTouchingBoundryX(objId txt);
+        bool isTxtTouchingBoundryY(objId txt);
         std::vector<int> objRecycleBin;
-        
+        bool checkOverlap(const objId ia, const objId ib);
+        void addChild(objId parent , objId child);
 };
-bool checkOverlap(const objects& a, const objects& b);
+
 void iniTerminal();
 void endDiscky();
 

@@ -229,15 +229,15 @@ static void renderRectangleObj(Discky& discky , objects& obj , const pxf* parent
         }
     };
 
-    if(obj.boder>=1.0){
+    if(obj.border>=1.0){
         for(int i=ty ; i<=by ; i++)blendRange(discky , bx , tx , i , obj.color , obj.opacity);
         return;
     }
 
     int w = tx - bx+1;
     int h = by - ty +1;
-    int hx = std::max(1 , (int)std::lround(obj.boder*(w/2.0)));
-    int hy = std::max(1 , (int)std::lround(obj.boder*(h/2.0)));
+    int hx = std::max(1 , (int)std::lround(obj.border*(w/2.0)));
+    int hy = std::max(1 , (int)std::lround(obj.border*(h/2.0)));
 
     for(int i=ty ; i<=by ; i++){
         if((i<ty+hy)||(i>by - hy)){
@@ -258,7 +258,7 @@ static void renderCircleObj(Discky& discky , objects& obj , const pxf* parent , 
     double rx = obj.vertex[1].x;
     double ry = obj.vertex[1].y;
     double ir = 0.0;
-    if(obj.boder<1.0)ir = 1.0 - obj.boder;
+    if(obj.border<1.0)ir = 1.0 - obj.border;
 
     double cx = obj.vertex[0].x;
     double cy = obj.vertex[0].y;
@@ -350,8 +350,8 @@ static void renderTriangleObj(Discky& discky , objects& obj , const pxf* parent 
     double mx = (x1+x2+x3)/3.0;
     double my = (y1 + y2+ y3)/3.0;
 
-    bool hasBorder = obj.boder<1.0;
-    double scale = 1.0 - obj.boder;
+    bool hasBorder = obj.border<1.0;
+    double scale = 1.0 - obj.border;
     double ix1 = mx + ((x1 - mx)*scale);
     double ix2 = mx + ((x2 - mx)*scale);
     double ix3 = mx + ((x3 -mx )*scale);
@@ -415,18 +415,18 @@ static void renderPoly(Discky& discky , objects obj , const pxf* parent , const 
     centerX/=n;
     centerY/=n;
     
-    bool hasBoder = obj.boder<1.0;
+    bool hasborder = obj.border<1.0;
     std::vector<double> xi(n) , yi(n);
-    double scale = 1.0 - obj.boder;
-    if(hasBoder){
+    double scale = 1.0 - obj.border;
+    if(hasborder){
         for(int i=0 ; i<n ; i++){
             xi[i] = centerX + ((cx[i] - centerX)*scale);
             yi[i] =centerY + ((cy[i] - centerY)*scale);
         }
     }
-    ist tsi = [&cx ,&cy , &xi , &yi , hasBoder](double px , double py)->bool{
+    ist tsi = [&cx ,&cy , &xi , &yi , hasborder](double px , double py)->bool{
         if(!pointInPoly(px , py , cx ,cy))return 0;
-        if(hasBoder && pointInPoly(px , py , xi , yi))return 0;
+        if(hasborder && pointInPoly(px , py , xi , yi))return 0;
         return 1;
     };
     int minX = (int)std::floor(fxMin);
@@ -449,7 +449,7 @@ static ist buildObjShapeTest(const objects& obj){
             double rx = obj.vertex[1].x;
             double ry = obj.vertex[1].y;
             double ir = 0.0;
-            if(obj.boder<1.0)ir = 1.0 - obj.boder;
+            if(obj.border<1.0)ir = 1.0 - obj.border;
             return [cx , cy , rx , ry , ir](double px , double py)->bool{
                 if((rx<=0.0)||(ry<=0.0))return 0;
                 double dx = (px - cx)/rx;

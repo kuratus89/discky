@@ -64,7 +64,7 @@ struct objects{
     objType type;
     objColor color;
     bool removed=0;
-    double boder=1;
+    double border=1;
     double opacity=1.0;
     int minX;
     int maxX;
@@ -102,11 +102,11 @@ class Discky{
         void callErrorHandle(ERRORS error , const std::string& msg) const;
         void setErrorHandleFunc(std::function<void(ERRORS , const std::string&)> handler);
         void setBackground(const objColor& color);
-        objId drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color , const double& boder =1.0 , const double& opacity =1.0);
-        objId drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
-        objId drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& boder = 1.0 , const double& opacity = 1.0);
+        objId drawRectangle(const Coordinate& a, const Coordinate& b ,const objColor& color , const double& border =1.0 , const double& opacity =1.0);
+        objId drawCircle(const Coordinate& a , const Coordinate& b , const objColor& color , const double& border = 1.0 , const double& opacity = 1.0);
+        objId drawTriangle(const Coordinate& a , const Coordinate& b , const Coordinate& c , const objColor& color , const double& border = 1.0 , const double& opacity = 1.0);
         objId drawLine(const Coordinate& a , const Coordinate& b, const objColor& color , const double& opacity= 1.0);
-        objId drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& boder =1.0 , const double& opacity = 1.0);
+        objId drawPoly(const std::vector<Coordinate> &ver ,const objColor &color , const double& border =1.0 , const double& opacity = 1.0);
         objId drawRawTxt(const Coordinate& a ,const std::string& txt , const objColor& color);
         void removeObj(objects& obj);
         void render();

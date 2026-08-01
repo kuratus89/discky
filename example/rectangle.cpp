@@ -20,5 +20,5 @@ int main(){
         discky.display(); // DISPLAY THE RENDERED SCREEN
         std::this_thread::sleep_for(std::chrono::milliseconds(150));
     }
-    
+    endDiscky();
 }

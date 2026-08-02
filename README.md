@@ -1,14 +1,13 @@
 # DISCKY
 
-discky is a terminal graphics library to draw colored 2D preimitives in terminal window.
+discky is a terminal graphics library to draw colored 2D preimitives in terminal window using ASCII.
 
 It provides API to:
 - create drawable objects
 - rendering them into a frame buffer
 - and display frames continuously for static scenes or animation.
 
-IMPORTANT NOTE : you can decrease the text size ( using ctrl + '-' key combination) to increase the terminal size
-you will get higher resolution in larger terminal size
+Important: You can increase the effective terminal resolution by reducing the text size (press Ctrl + -). A larger terminal window allows more characters to fit on the screen, resulting in a higher-resolution display.
 
 ---
 

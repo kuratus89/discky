@@ -9,14 +9,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# Put executables in the project's bin folder
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+# Static library
 add_library(discky STATIC
     src/discky.cpp
     src/window.cpp
-    # src/memory.cpp
     src/render.cpp
     src/screen.cpp
 )
@@ -30,6 +29,7 @@ target_include_directories(discky
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+# Executables
 add_executable(rectangle example/rectangle.cpp)
 add_executable(animate_rectangle example/animate_rectangle.cpp)
 add_executable(animate_circle example/animate_circle.cpp)
@@ -37,10 +37,29 @@ add_executable(all_shape example/all_shapes.cpp)
 add_executable(diamond example/diamond.cpp)
 add_executable(pacman example/pacman.cpp)
 add_executable(text example/text.cpp)
+
+# Link library
 target_link_libraries(rectangle PRIVATE discky)
 target_link_libraries(animate_rectangle PRIVATE discky)
 target_link_libraries(animate_circle PRIVATE discky)
 target_link_libraries(all_shape PRIVATE discky)
 target_link_libraries(diamond PRIVATE discky)
-target_link_libraries(text PRIVATE discky)
 target_link_libraries(pacman PRIVATE discky)
+target_link_libraries(text PRIVATE discky)
+
+# Statically link the GCC runtime into each executable
+foreach(target
+    rectangle
+    animate_rectangle
+    animate_circle
+    all_shape
+    diamond
+    pacman
+    text
+)
+    target_link_options(${target} PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
+    )
+endforeach()

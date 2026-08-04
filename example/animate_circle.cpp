@@ -45,8 +45,8 @@ int main(){
     
 
     while(true){
-        objId a = discky.drawCircle(NOR_COORD(ax, ay) , NOR_LEN_MONO(0.175) , DISCKY_COLOR_GREEN);
-        objId b = discky.drawCircle(NOR_COORD(bx , by) , NOR_LEN_MONO(0.175) , DISCKY_COLOR_RED);
+        objId a = discky.drawCircle(COORD_NOR(ax, ay) , LEN_MONO_NOR(0.175) , DISCKY_COLOR_GREEN);
+        objId b = discky.drawCircle(COORD_NOR(bx , by) , LEN_MONO_NOR(0.175) , DISCKY_COLOR_RED);
         discky.render();
         handleObjectCollision(discky , a , b , aSpeedX , aSpeedY , bSpeedX , bSpeedY);
         

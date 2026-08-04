@@ -12,9 +12,9 @@ int main(){
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLUE);
     discky.setAntiAliasing(antiAliasing::AA_LOW);
-    discky.drawPoly({NOR_COORD(0 , -1) , NOR_COORD(1 , 0) , NOR_COORD(0 , 1) , NOR_COORD(-1 , 0)} , DISCKY_COLOR_RED);
-    discky.drawRectangle( NOR_COORD(-0.5+ 0.02 , -0.5 + 0.02) , NOR_COORD(0.5 -0.02 , 0.5 - 0.02) , DISCKY_COLOR_BLUE);
-    discky.drawPoly({NOR_COORD(0 , -0.5+ 0.02) , NOR_COORD( 0.5 - 0.02 , 0) , NOR_COORD(0 , 0.5 - 0.02) , NOR_COORD(-0.5+ 0.02 , 0)} , DISCKY_COLOR_RED);
+    discky.drawPoly({COORD_NOR(0 , -1) , COORD_NOR(1 , 0) , COORD_NOR(0 , 1) , COORD_NOR(-1 , 0)} , DISCKY_COLOR_RED);
+    discky.drawRectangle( COORD_NOR(-0.5+ 0.02 , -0.5 + 0.02) , COORD_NOR(0.5 -0.02 , 0.5 - 0.02) , DISCKY_COLOR_BLUE);
+    discky.drawPoly({COORD_NOR(0 , -0.5+ 0.02) , COORD_NOR( 0.5 - 0.02 , 0) , COORD_NOR(0 , 0.5 - 0.02) , COORD_NOR(-0.5+ 0.02 , 0)} , DISCKY_COLOR_RED);
     while(true){
         discky.render();
         discky.display();

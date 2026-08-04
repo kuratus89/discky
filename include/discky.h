@@ -44,12 +44,13 @@ struct Coordinate{
     double norX;
     double norY;
 };
-inline Coordinate NOR_COORD(double a, double b){return Coordinate{unitType::COOR_NOR , -1 , -1 , a , b};}
-inline Coordinate SCR_COORD(int a , int b){return Coordinate{unitType::COOR_PIX ,a , b , -1 , -1};}
-inline Coordinate SCR_LEN_MONO(int x){return Coordinate{unitType::LEN_PIX , x , -1 , -1 , -1};}
-inline Coordinate NOR_LEN_MONO(double x){return Coordinate{unitType::LEN_NOR , -1 , -1 , x , -1};}
-inline Coordinate SCR_LEN_DI(int a , int b){return Coordinate{unitType::LEN_PIX , a , b , -1 , -1};}
-inline Coordinate NOR_LEN_DI(double a , double b){return Coordinate{unitType::LEN_NOR , -1 , -1 , a , b};}
+inline Coordinate COORD_NOR(double a, double b){return Coordinate{unitType::COOR_NOR , -1 , -1 , a , b};}
+inline Coordinate COORD_PIX(int a , int b){return Coordinate{unitType::COOR_PIX ,a , b , -1 , -1};}
+inline Coordinate LEN_MONO_PIX(int x){return Coordinate{unitType::LEN_PIX , x , -1 , -1 , -1};}
+inline Coordinate LEN_MONO_NOR(double x){return Coordinate{unitType::LEN_NOR , -1 , -1 , x , -1};}
+inline Coordinate LEN_DI_PIX(int a , int b){return Coordinate{unitType::LEN_PIX , a , b , -1 , -1};}
+inline Coordinate LEN_DI_NOR(double a , double b){return Coordinate{unitType::LEN_NOR , -1 , -1 , a , b};}
+
 
 struct objColor{
     int r;

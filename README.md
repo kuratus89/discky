@@ -1,14 +1,13 @@
 # DISCKY
 
-discky is a terminal graphics library to draw colored 2D preimitives in terminal window.
+discky is a terminal graphics library to draw colored 2D preimitives in terminal window using ASCII.
 
 It provides API to:
 - create drawable objects
 - rendering them into a frame buffer
 - and display frames continuously for static scenes or animation.
 
-IMPORTANT NOTE : you can decrease the text size ( using ctrl + '-' key combination) to increase the terminal size
-you will get higher resolution in larger terminal size
+Important: You can increase the effective terminal resolution by reducing the text size (press Ctrl + -). A larger terminal window allows more characters to fit on the screen, resulting in a higher-resolution display.
 
 ---
 
@@ -194,6 +193,31 @@ void handleDisckyError(ERRORS error ,const std::string& msg){
 
 There are examples in "example" folder , you can observe the code and learn from them for better experience
 
+Here are some pics of examples:
+rectangle.cpp
+<img width="1280" height="720" alt="{0B8E187C-51F4-4CCE-AC8C-B618015EE822}" src="https://github.com/user-attachments/assets/ae8722d9-f792-4d02-86a0-09f35157b853" />
+
+diamond.cpp :
+<img width="1280" height="720" alt="{B5EE1844-81D9-405D-A956-E79A37B18DE2}" src="https://github.com/user-attachments/assets/905fda0c-1e42-44a7-ae58-3ff53ea9e53c" />
+
+all_shape.cpp :
+<img width="1280" height="719" alt="{47E62BCA-5279-4F30-AF53-E7772BA406BF}" src="https://github.com/user-attachments/assets/637edd62-ccee-44f4-b7cb-4190b98fd8a5" />
+
+animate_rectangle.cpp :
+
+https://github.com/user-attachments/assets/7eb3f84f-f3dc-49dd-8ac0-8cac681be291
+
+animate_circle.cpp :
+
+https://github.com/user-attachments/assets/a7fd9fa0-615a-4f6c-8029-ce4a8aef7ded
+
+pacman.cpp :
+
+https://github.com/user-attachments/assets/514a08b7-ed23-4dc5-b3ca-4dc974395569
+
+
+
+
 ---
 
 ## Build
@@ -205,3 +229,4 @@ cd build
 cmake ..
 cmake --build .
 ```
+Binary of all examples will be generated in bin/ folder

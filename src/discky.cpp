@@ -112,16 +112,27 @@ objId Discky::drawTriangle(const Coordinate& a , const Coordinate& b , const Coo
     return recycleObjPush(*this , obj);
 }
 
-
-bool Discky::isObjectTouchingBoundryX(objId obj){
+bool Discky::isObjectTouchingLeft(objId obj){
     if((obj<0)||(obj>=objs.size()))return 0;
-    if((objs[obj].minX<=0)||(objs[obj].maxX>=terminalInfo.x))return 1;
+    if((objs[obj].minX<=0))return 1;
     return 0;
 }
 
-bool Discky::isObjectTouchingBoundryY(objId obj){
+bool Discky::isObjectTouchingRight(objId obj){
     if((obj<0)||(obj>=objs.size()))return 0;
-    if((objs[obj].minY<=0)||(objs[obj].maxY>=terminalInfo.y))return 1;
+    if((objs[obj].maxX>=terminalInfo.x -1))return 1;
+    return 0;
+}
+
+bool Discky::isObjectTouchingTop(objId obj){
+    if((obj<0)||(obj>=objs.size()))return 0;
+    if((objs[obj].minY<=0))return 1;
+    return 0;
+}
+
+bool Discky::isObjectTouchingBottom(objId obj){
+    if((obj<0)||(obj>=objs.size()))return 0;
+    if(objs[obj].maxY>=terminalInfo.y- 1)return 1;
     return 0;
 }
 
@@ -353,14 +364,45 @@ objId Discky::drawRawTxt(const Coordinate& a , const std::string& txt , const ob
     return (rawTxts.size()-1);
 }
 
-bool Discky::isTxtTouchingBoundryX(objId txt){
-    if((txt<0)||(txt>=rawTxts.size()))return 0;
-    if((rawTxts[txt].vertex.x <=0)||(rawTxts[txt].vertex.x+ rawTxts[txt].txt.size()>=terminalInfo.x ))return 1;
+// bool Discky::isTxtTouchingBoundryX(objId txt){
+//     if((txt<0)||(txt>=rawTxts.size()))return 0;
+//     if((rawTxts[txt].vertex.x <=0)||(rawTxts[txt].vertex.x+ rawTxts[txt].txt.size()>=terminalInfo.x ))return 1;
+//     return 0;
+// }
+
+// bool Discky::isTxtTouchingBoundryY(objId txt){
+//     if((txt<0)||(txt>=rawTxts.size()))return 0;
+//     if((rawTxts[txt].vertex.y <=0)||(rawTxts[txt].vertex.y >= (terminalInfo.y/2)))return 1;
+//     return 0;
+// }
+
+bool Discky::isTextTouchingLeft(objId obj){
+    if((obj<0)||(obj>=rawTxts.size()))return 0;
+    if(rawTxts[obj].vertex.x <=0)return 1;
     return 0;
 }
 
-bool Discky::isTxtTouchingBoundryY(objId txt){
-    if((txt<0)||(txt>=rawTxts.size()))return 0;
-    if((rawTxts[txt].vertex.y <=0)||(rawTxts[txt].vertex.y >= (terminalInfo.y/2)))return 1;
+bool Discky::isTextTouchingRight(objId obj){
+    if((obj<0)||(obj>=rawTxts.size()))return 0;
+    if(rawTxts[obj].vertex.x + rawTxts[obj].txt.size()>=terminalInfo.x -1)return 1;
     return 0;
+}
+
+bool Discky::isTextTouchingTop(objId obj){
+    if((obj<0)||(obj>=rawTxts.size()))return 0;
+    if(rawTxts[obj].vertex.y <=0)return 1;
+    return 0;
+}
+
+bool Discky::isTextTouchingBottom(objId obj){
+    if((obj<0)||(obj>=rawTxts.size()))return 0;
+    if(rawTxts[obj].vertex.y>=(terminalInfo.y -1)/2)return 1;
+    return 0;
+}
+void Discky::setForceRedraw(){
+    permanantForceRedraw=1;
+}
+
+void Discky:: clearForceRedraw(){
+    permanantForceRedraw=0;
 }

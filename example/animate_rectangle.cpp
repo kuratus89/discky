@@ -23,11 +23,13 @@ int main(){
         objId rect = discky.drawRectangle(COORD_NOR(x - size , y- size) , COORD_NOR(x+size , y+size) , DISCKY_COLOR_GREEN);
         discky.render();
         discky.display();
-        
-        if(discky.isObjectTouchingBoundryX(rect))speedx = -speedx;
-        if(discky.isObjectTouchingBoundryY(rect))speedy = - speedy;
+        if(discky.isObjectTouchingTop(rect))speedy = std::abs(speedy);
+        if(discky.isObjectTouchingBottom(rect))speedy = -std::abs(speedy);
+        if(discky.isObjectTouchingLeft(rect))speedx = std::abs(speedx);
+        if(discky.isObjectTouchingRight(rect))speedx = -std::abs(speedx);
         x+=speedx;
         y+=speedy;
+        
         discky.refresh();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }

@@ -12,8 +12,8 @@ int main(){
     discky.setErrorHandleFunc(handleDisckyError);
     discky.setBackground(DISCKY_COLOR_BLACK);
     discky.setAntiAliasing(antiAliasing::AA_LOW);
-    double speeda = 0.4;
-    double speedb = -0.4;
+    double speeda = 0.5;
+    double speedb = -0.5;
     double a = 0.0;
     double b = 0.0;
     while(true){

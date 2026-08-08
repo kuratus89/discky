@@ -68,16 +68,38 @@ static void normalizedToScreenLength(Discky& discky , Coordinate& coor){
     coor.y = (coor.norY * (discky.terminalInfo.y -1));
 }
 
-static void normalizedToScreen(Discky& discky ,Coordinate& coor){
-    if(coor.type == COOR_PIX)return;
-    if((coor.type == LEN_NOR)||(coor.type ==LEN_PIX)){
-        normalizedToScreenLength(discky , coor);
-        return;
-    }
+
+// static void normalizedToScreen(Discky& discky ,Coordinate& coor){
+//     if(coor.type == unitType::COOR_PIX)return;
+//     if(coor.type == unitType::TXT_COORD_PIX)return;
+//     if((coor.type == LEN_NOR)||(coor.type ==LEN_PIX)){
+//         normalizedToScreenLength(discky , coor);
+//         return;
+//     }
+//     if(coor.type == unitType::TXT_COORD_NOR){
+//         coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
+//         coor.y = ((coor.norY + (double)1.0) * (double)((discky.terminalInfo.y /2) -1)) / (double)2.0;
+//         return;
+//     }
     
 
-    coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
-    coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1))/ (double)2.0;
+//     coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1))/ (double)2.0;
+//     coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1))/ (double)2.0;
+// }
+
+static void normalizedToScreen(Discky& discky , Coordinate& coor){
+    switch(coor.type){
+        case(unitType::LEN_NOR):
+        case(unitType::LEN_PIX):normalizedToScreenLength(discky , coor);
+        case(unitType::COOR_PIX):
+        case(unitType::TXT_COORD_PIX):return;
+        default:{
+            if(coor.type==unitType::TXT_COORD_NOR)coor.y = ((coor.norY + (double)1.0)* (double)((discky.terminalInfo.y/2)-1)) / (double )2.0;
+            else coor.y = ((coor.norY + (double)1.0) * (double)(discky.terminalInfo.y -1)) / (double) 2.0;
+            coor.x = ((coor.norX + (double)1.0) * (double)(discky.terminalInfo.x -1)) / (double)2.0;
+            return;
+        }
+    }
 }
 static void toScreen(Discky& discky , Coordinate& coor , const pxf* p){
     if(p==nullptr){

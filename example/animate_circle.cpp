@@ -7,14 +7,13 @@ void handleDisckyError(ERRORS error , const std::string& msg){
     std::cerr<<msg;
 }
 
-void handleBoundryCollision(Discky& discky , int obj , double posx , double posy , double& speedx , double& speedy){
-    if(discky.isObjectTouchingBoundryX(obj)){
-        if(((posx>0)&&(speedx >0))||((posx<0)&&(speedx<0)))speedx = -speedx;
-        
-    }
-    if(discky.isObjectTouchingBoundryY(obj)){
-        if(((posy>0)&&(speedy>0))||((posy<0)&&(speedy<0)))speedy = -speedy;
-    }
+void handleBoundryCollision(Discky& discky , objId& obj ,double& speedx , double& speedy){
+    
+
+    if(discky.isObjectTouchingTop(obj))speedy = std::abs(speedy);
+    if(discky.isObjectTouchingBottom(obj))speedy = -std::abs(speedy);
+    if(discky.isObjectTouchingLeft(obj))speedx = std::abs(speedx);
+    if(discky.isObjectTouchingRight(obj))speedx = -std::abs(speedx);
 }
 
 void handleObjectCollision(Discky& discky , int a , int b , double& aSpeedX , double& aSpeedY , double& bSpeedX , double& bSpeedY ){
@@ -50,8 +49,8 @@ int main(){
         discky.render();
         handleObjectCollision(discky , a , b , aSpeedX , aSpeedY , bSpeedX , bSpeedY);
         
-        handleBoundryCollision(discky , a , ax , ay , aSpeedX , aSpeedY);
-        handleBoundryCollision(discky , b , bx , by , bSpeedX , bSpeedY);
+        handleBoundryCollision(discky , a , aSpeedX , aSpeedY);
+        handleBoundryCollision(discky , b , bSpeedX , bSpeedY);
 
         
         ax+=aSpeedX;
@@ -59,7 +58,7 @@ int main(){
         bx+=bSpeedX;
         by+=bSpeedY;
         
-        discky.refresh();
+        // discky.refresh();
         discky.display();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }

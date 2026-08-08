@@ -29,6 +29,8 @@ enum unitType{
     COOR_NOR,
     LEN_PIX,
     LEN_NOR,
+    TXT_COORD_PIX,
+    TXT_COORD_NOR,
 };
 enum class antiAliasing{
     AA_NONE,
@@ -50,6 +52,8 @@ inline Coordinate LEN_MONO_PIX(int x){return Coordinate{unitType::LEN_PIX , x , 
 inline Coordinate LEN_MONO_NOR(double x){return Coordinate{unitType::LEN_NOR , -1 , -1 , x , -1};}
 inline Coordinate LEN_DI_PIX(int a , int b){return Coordinate{unitType::LEN_PIX , a , b , -1 , -1};}
 inline Coordinate LEN_DI_NOR(double a , double b){return Coordinate{unitType::LEN_NOR , -1 , -1 , a , b};}
+inline Coordinate COORD_TXT_PIX(int a , int b){return Coordinate{unitType::TXT_COORD_PIX , a , b/2 , -1 , -1};}
+inline Coordinate COORD_TXT_NOR(double a , double b){return Coordinate{unitType::TXT_COORD_NOR , -1 , -1 , a , b};}
 
 
 struct objColor{
@@ -98,6 +102,7 @@ class Discky{
         objColor bgColor;
         std::function<void(ERRORS , const std::string&)> handleErrors;
         bool forceRedraw=1;
+        bool permanantForceRedraw=0;
         antiAliasing aaMode = antiAliasing::AA_NONE;
         Discky();
         void callErrorHandle(ERRORS error , const std::string& msg) const;
@@ -116,13 +121,20 @@ class Discky{
         int getTerminalSizeX();
         int getTerminalSizeY();
         void setAntiAliasing(const antiAliasing& mode);
-        bool isObjectTouchingBoundryX(objId obj);
-        bool isObjectTouchingBoundryY(objId obj);
-        bool isTxtTouchingBoundryX(objId txt);
-        bool isTxtTouchingBoundryY(objId txt);
+        bool isObjectTouchingTop(objId obj);
+        bool isObjectTouchingBottom(objId obj);
+        bool isObjectTouchingLeft(objId obj);
+        bool isObjectTouchingRight(objId obj);
+        bool isTextTouchingTop(objId obj);
+        bool isTextTouchingBottom(objId obj);
+        bool isTextTouchingLeft(objId obj);
+        bool isTextTouchingRight(objId obj);
+
         std::vector<int> objRecycleBin;
         bool checkOverlap(const objId ia, const objId ib);
         void addChild(objId parent , objId child);
+        void setForceRedraw();
+        void clearForceRedraw();
 };
 
 void iniTerminal();

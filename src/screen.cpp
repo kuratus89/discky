@@ -75,6 +75,7 @@ void Discky::display(){
         }
     }
     else{
+        if(forceRedraw&&(!permanantForceRedraw))forceRedraw=0;
         
         for(int i=0 ; i<terminalInfo.y ; i+=2 , sy++){
             for(int j=0 ; j<terminalInfo.x ; j++){
